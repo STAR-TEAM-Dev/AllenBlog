@@ -1,0 +1,361 @@
+---
+import Comment from "@components/comment/index.astro";
+import { Icon } from "astro-icon/components";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { fetchEch0Posts } from "../utils/ech0-api";
+
+// 从Ech0 API获取动态数据（服务器端）
+let essays = await fetchEch0Posts("https://say.allen2030.com");
+
+// 如果服务器端获取失败（只有一条备用数据），标记需要客户端获取
+const needsClientFetch = essays.length === 1 && essays[0].tags.includes("系统");
+
+// 为评论区创建一个模拟的post对象
+const mockPost = {
+	slug: "essay",
+	data: {
+		title: "瞬间",
+	},
+};
+---
+
+<MainGridLayout title="瞬间" description="记录生活中的美好瞬间">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-8">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <h1 class="text-4xl font-bold mb-6 text-neutral-900 dark:text-white">说说</h1>
+            <p class="text-neutral-600 dark:text-neutral-400 mb-8">Ech0 API智能获取</p>
+            
+            <div id="essays-container" class="space-y-6" data-needs-fetch={needsClientFetch ? "true" : "false"}>
+                {essays.map((essay) => (
+                    <div class="essay-item bg-[var(--card-bg)] rounded-lg p-6 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md">
+                        <!-- 内容 -->
+                        <div class="essay-content text-90 text-lg leading-relaxed mb-4">
+                            {essay.content}
+                        </div>
+                        
+                        <!-- 图片 -->
+                        {essay.images && essay.images.length > 0 && (
+                            <div class="essay-images mb-4">
+                                <div class:list={[
+                                    "custom-md grid gap-3",
+                                    essay.images.length === 1 ? "grid-cols-1" : 
+                                    essay.images.length === 2 ? "grid-cols-2" :
+                                    essay.images.length === 3 ? "grid-cols-3" :
+                                    "grid-cols-2 md:grid-cols-3"
+                                ]}>
+                                    {essay.images.map((image, index) => (
+                                        <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)]">
+                                            <img 
+                                                src={image} 
+                                                alt={`瞬间图片 ${index + 1}`}
+                                                class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        <!-- 底部信息 -->
+                        <div class="essay-meta flex items-center justify-between text-sm text-75">
+                            <div class="flex items-center gap-4">
+                                <!-- 时间 -->
+                                <div class="flex items-center gap-1">
+                                    <Icon name="material-symbols:schedule" class="text-base" />
+                                    <span>{essay.time}</span>
+                                </div>
+                                
+                                <!-- 标签 -->
+                                {essay.tags && essay.tags.length > 0 && (
+                                    <div class="flex items-center gap-2">
+                                        <Icon name="material-symbols:tag" class="text-base" />
+                                        <div class="flex gap-2">
+                                            {essay.tags.map((tag) => (
+                                                <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-full text-xs">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <!-- 评论按钮 -->
+                            <div>
+                                <button 
+                                    class="flex items-center gap-1 text-sm hover:text-primary transition-colors"
+                                    data-content={`${essay.content}`}
+                                    onclick="window.commentOnPost(this)"
+                                >
+                                    <Icon name="material-symbols:chat" class="text-base" />
+                                    <span>评论</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+
+    <!-- 评论区 -->
+    <div id="comments-section" class="twikoo-container">
+        <Comment path="/essay/" />
+    </div>
+</MainGridLayout>
+
+
+
+<style>
+    .essay-item {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .essay-content {
+        word-wrap: break-word;
+        white-space: pre-wrap;
+    }
+</style>
+
+<script>
+    // 扩展Window接口
+    declare global {
+        interface Window {
+            commentOnPost: (button: HTMLButtonElement) => void;
+        }
+    }
+
+    // 全局评论函数
+    window.commentOnPost = function(button: HTMLButtonElement) {
+        const content = button.dataset.content;
+        console.log('commentOnPost called with content:', content);
+        
+        // 滚动到评论区
+        const commentsSection = document.getElementById('comments-section');
+        if (commentsSection) {
+            console.log('Found comments section, scrolling...');
+            commentsSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            console.log('Comments section not found, scrolling to bottom...');
+            window.scrollTo({ 
+                top: document.body.scrollHeight, 
+                behavior: 'smooth' 
+            });
+        }
+        
+        // 增加延迟时间，确保滚动完成且Twikoo完全加载
+        setTimeout(() => {
+            console.log('Trying to find textarea...');
+            // 尝试找到Twikoo输入框
+            const textarea = document.querySelector('.el-textarea__inner') as HTMLTextAreaElement | null || 
+                           document.querySelector('#twikoo textarea') as HTMLTextAreaElement | null || 
+                           document.querySelector('textarea') as HTMLTextAreaElement | null;
+            
+            if (textarea && content) {
+                console.log('Found textarea:', textarea);
+                // 填充引用内容
+                textarea.value = `> ${content}\n\n`;
+                // 聚焦输入框
+                textarea.focus();
+                // 触发输入事件
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('Content filled into textarea');
+            } else {
+                console.log('Textarea not found, trying again...');
+                // 再次尝试
+                setTimeout(() => {
+                    const retryTextarea = document.querySelector('.el-textarea__inner') as HTMLTextAreaElement | null || 
+                                         document.querySelector('textarea') as HTMLTextAreaElement | null;
+                    if (retryTextarea && content) {
+                        console.log('Found textarea on retry:', retryTextarea);
+                        retryTextarea.value = `> ${content}\n\n`;
+                        retryTextarea.focus();
+                        retryTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                        console.log('Content filled into textarea on retry');
+                    } else {
+                        console.log('Textarea still not found');
+                    }
+                }, 500);
+            }
+        }, 800);
+    };
+
+    // 客户端获取Ech0数据（作为服务器端获取失败的备用方案）
+    async function fetchEch0PostsClient() {
+        const container = document.getElementById('essays-container');
+        if (!container || container.dataset.needsFetch !== 'true') {
+            return; // 不需要客户端获取
+        }
+
+        try {
+            console.log('Client-side fetching Ech0 posts...');
+            const response = await fetch('https://say.allen2030.com/rss');
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch: ${response.status}`);
+            }
+            
+            const xmlText = await response.text();
+            console.log('Client-side RSS response length:', xmlText.length);
+            
+            // 解析RSS数据
+            const entries = parseRSS(xmlText);
+            console.log('Client-side parsed entries:', entries.length);
+            
+            if (entries.length > 0) {
+                // 重新渲染说说列表
+                renderEssays(entries);
+            }
+        } catch (error) {
+            console.error('Client-side fetch error:', error);
+            // 保持备用数据显示
+        }
+    }
+
+    // 客户端RSS解析
+    function parseRSS(xmlText: string) {
+        const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
+        const entries: any[] = [];
+        let match: RegExpExecArray | null = null;
+        let index = 0;
+        
+        while (true) {
+            match = entryRegex.exec(xmlText);
+            if (match === null) break;
+            const entryText = match[1];
+            index++;
+            
+            const updatedMatch = entryText.match(/<updated>([\s\S]*?)<\/updated>/);
+            const updated = updatedMatch ? updatedMatch[1] : '';
+            
+            const summaryMatch = entryText.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
+            const summary = summaryMatch ? summaryMatch[1] : '';
+            
+            // 解码HTML实体
+            let decodedSummary = summary
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#34;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&#xA;/g, '\n');
+            
+            // 提取纯文本
+            const content = decodedSummary.replace(/<[^>]*>/g, '').trim() || '[图片]';
+            
+            // 提取图片
+            const images: string[] = [];
+            const imgRegex = /<img[^>]*src=["']([^"']+)["']/gi;
+            let imgMatch: RegExpExecArray | null = null;
+            while (true) {
+                imgMatch = imgRegex.exec(decodedSummary);
+                if (imgMatch === null) break;
+                let url = imgMatch[1];
+                if (url.startsWith('http://')) {
+                    url = url.replace('http://', 'https://');
+                }
+                images.push(url);
+            }
+            
+            // 格式化日期
+            const date = updated ? new Date(updated).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            
+            entries.push({
+                id: index,
+                content,
+                time: date,
+                tags: ['生活'],
+                images: images.length > 0 ? images : undefined
+            });
+        }
+        
+        return entries.sort((a, b) => b.id - a.id);
+    }
+
+    // 渲染说说列表
+    function renderEssays(essays: any[]) {
+        const container = document.getElementById('essays-container');
+        if (!container) return;
+        
+        container.innerHTML = essays.map(essay => `
+            <div class="essay-item bg-[var(--card-bg)] rounded-lg p-6 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md">
+                <div class="essay-content text-90 text-lg leading-relaxed mb-4">${escapeHtml(essay.content)}</div>
+                
+                ${essay.images && essay.images.length > 0 ? `
+                    <div class="essay-images mb-4">
+                        <div class="custom-md grid gap-3 ${essay.images.length === 1 ? 'grid-cols-1' : essay.images.length === 2 ? 'grid-cols-2' : essay.images.length === 3 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-3'}">
+                            ${essay.images.map((image: string, index: number) => `
+                                <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)]">
+                                    <img 
+                                        src="${image}" 
+                                        alt="瞬间图片 ${index + 1}"
+                                        class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="essay-meta flex items-center justify-between text-sm text-75">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                            <span>${essay.time}</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 10V8h-4V4h-2v4h-4V4H8v4H4v2h4v4H4v2h4v4h2v-4h4v4h2v-4h4v-2h-4v-4h4zm-6 4h-4v-4h4v4z"/></svg>
+                            <div class="flex gap-2">
+                                ${essay.tags.map((tag: string) => `
+                                    <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-full text-xs">${tag}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button 
+                            class="flex items-center gap-1 text-sm hover:text-primary transition-colors"
+                            data-content="${escapeHtml(essay.content)}"
+                            onclick="window.commentOnPost(this)"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                            <span>评论</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // HTML转义函数
+    function escapeHtml(text: string): string {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 页面加载完成后执行客户端获取
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fetchEch0PostsClient);
+    } else {
+        fetchEch0PostsClient();
+    }
+</script>

@@ -1,0 +1,99 @@
+---
+import { Icon } from "astro-icon/components";
+import I18nKey from "../../i18n/i18nKey";
+import { i18n } from "../../i18n/translation";
+
+interface Props {
+	id: string;
+	name?: string;
+	isCollapsed?: boolean;
+	collapsedHeight?: string;
+	class?: string;
+	style?: string;
+}
+const { id, name, isCollapsed, collapsedHeight, style } = Astro.props;
+const className = Astro.props.class;
+---
+<widget-layout data-id={id} data-is-collapsed={String(isCollapsed)} class={"pb-4 card-base card-shadow card-glass " + className} style={style}>
+    <div class="font-bold transition text-lg text-neutral-800 dark:text-neutral-100 relative ml-8 mt-4 mb-2
+        before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
+        before:absolute before:left-[-16px] before:top-[5.5px]">{name}</div>
+    <div id={id} class:list={["collapse-wrapper px-4 overflow-hidden", {"collapsed": isCollapsed}]}>
+        <slot></slot>
+    </div>
+    {isCollapsed && <div class="expand-btn px-4 mt-2 -mb-2">
+        <button class="btn-plain rounded-lg w-full h-9">
+            <div class="text-[var(--primary)] flex items-center justify-center gap-2 -translate-x-2">
+                <Icon name="material-symbols:more-horiz" class="text-[1.75rem]"></Icon> {i18n(I18nKey.more)}
+            </div>
+        </button>
+    </div>}
+</widget-layout>
+
+<style define:vars={{ collapsedHeight }}>
+    .collapsed {
+        height: var(--collapsedHeight);
+    }
+</style>
+
+<script>
+    class WidgetLayout extends HTMLElement {
+        constructor() {
+            super();
+
+            const id = this.dataset.id;
+            const btn = this.querySelector('.expand-btn');
+            const wrapper = this.querySelector(`#${id}`)
+            const nameElement = this.querySelector('.font-bold');
+            let isCollapsed = this.dataset.isCollapsed === 'true';
+            
+            // 更新按钮文本和图标
+            const updateButton = () => {
+                if (btn) {
+                    const buttonContent = btn.querySelector('.text-\\[var\\(--primary\\)\\]');
+                    if (buttonContent) {
+                        buttonContent.innerHTML = isCollapsed 
+                            ? '<svg class="text-[1.75rem] inline-block" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2z"/></svg> 更多'
+                            : '<svg class="text-[1.75rem] inline-block" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2z"/></svg> 收起';
+                    }
+                }
+            };
+            
+            // 初始化按钮
+            if (isCollapsed) {
+                updateButton();
+            }
+            
+            // 点击按钮切换状态
+            btn?.addEventListener('click', () => {
+                isCollapsed = !isCollapsed;
+                this.dataset.isCollapsed = String(isCollapsed);
+                
+                if (isCollapsed) {
+                    wrapper!.classList.add('collapsed');
+                    btn!.classList.remove('hidden');
+                } else {
+                    wrapper!.classList.remove('collapsed');
+                    // 展开状态下也显示按钮，不再隐藏
+                    btn!.classList.remove('hidden');
+                }
+                
+                updateButton();
+            });
+            
+            // 点击标题也可以切换（仅当有超过阈值的内容时）
+            if (this.dataset.isCollapsed === 'true' || !isCollapsed) {
+                nameElement?.addEventListener('click', () => {
+                    if (btn) {
+                        (btn as HTMLElement).click();
+                    }
+                });
+                nameElement?.classList.add('cursor-pointer');
+            }
+        }
+    }
+
+    if (!customElements.get("widget-layout")) {
+        customElements.define("widget-layout", WidgetLayout);
+    }
+</script>

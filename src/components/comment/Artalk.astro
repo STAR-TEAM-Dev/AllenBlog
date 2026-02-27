@@ -1,0 +1,173 @@
+---
+interface Props {
+	path: string;
+}
+
+import { commentConfig } from "@/config";
+
+const config = {
+	el: "#artalk",
+	pageKey: Astro.props.path,
+	pageTitle: "",
+	server: commentConfig.artalk?.server,
+	site: commentConfig.artalk?.site,
+	darkMode: commentConfig.artalk?.darkMode,
+};
+---
+
+
+<div id="artalk"></div>
+<script define:vars={{ config }}>
+  function getCurrentTheme() {
+    // 检查当前文档是否有 dark 类
+    return document.documentElement.classList.contains('dark');
+  }
+  
+  function updateArtalkTheme(isDark) {
+    // 直接操作 Artalk 容器的主题类
+    const artalkEl = document.querySelector('#artalk');
+    if (artalkEl) {
+      if (isDark) {
+        artalkEl.setAttribute('data-theme', 'dark');
+        artalkEl.classList.add('atk-dark');
+        artalkEl.classList.remove('atk-light');
+      } else {
+        artalkEl.setAttribute('data-theme', 'light');
+        artalkEl.classList.add('atk-light');
+        artalkEl.classList.remove('atk-dark');
+      }
+    }
+  }
+  
+  function loadArtalk() {
+    console.log('loadArtalk function called');
+    
+    // 加载CSS
+    const cssLink = document.createElement('link');
+    cssLink.rel = 'stylesheet';
+    cssLink.href = 'https://artalk.fis.ink/dist/Artalk.css';
+    document.head.appendChild(cssLink);
+    
+    // 加载JS
+    const script = document.createElement('script');
+    script.src = 'https://artalk.fis.ink/dist/Artalk.js';
+    script.defer = true;
+    script.onload = () => {
+      console.log('Artalk script loaded, initializing...');
+      
+      try {
+        const isDark = getCurrentTheme();
+        const artalkInstance = Artalk.init({
+          el: config.el,
+          pageKey: config.pageKey,
+          pageTitle: config.pageTitle || document.title,
+          server: config.server,
+          site: config.site,
+          darkMode: isDark,
+        });
+        console.log('Artalk initialized successfully with theme:', isDark ? 'dark' : 'light');
+        
+        // 存储 Artalk 实例
+        window.artalkInstance = artalkInstance;
+        
+        // 确保初始化后立即应用正确的主题类
+        setTimeout(() => {
+          updateArtalkTheme(isDark);
+        }, 100);
+        
+        // 监听主题变化
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              const newIsDark = getCurrentTheme();
+              
+              // 立即更新 CSS 类以实现即时效果
+              updateArtalkTheme(newIsDark);
+              
+              // 尝试通过 API 更新 Artalk 主题
+              if (window.artalkInstance) {
+                try {
+                  // 尝试使用 Artalk 的主题切换方法
+                  if (typeof window.artalkInstance.setDarkMode === 'function') {
+                    window.artalkInstance.setDarkMode(newIsDark);
+                  } else if (typeof window.artalkInstance.update === 'function') {
+                    // 如果没有 setDarkMode 方法，尝试重新初始化
+                    window.artalkInstance.update({
+                      darkMode: newIsDark
+                    });
+                  } else {
+                    // 如果以上方法都不可用，重新初始化整个组件
+                    const artalkEl = document.querySelector('#artalk');
+                    if (artalkEl) {
+                      artalkEl.innerHTML = '';
+                      const newInstance = window.Artalk.init({
+                        el: config.el,
+                        pageKey: config.pageKey,
+                        pageTitle: config.pageTitle || document.title,
+                        server: config.server,
+                        site: config.site,
+                        darkMode: newIsDark,
+                      });
+                      window.artalkInstance = newInstance;
+                      // 重新应用主题类
+                      setTimeout(() => updateArtalkTheme(newIsDark), 100);
+                    }
+                  }
+                  console.log('Artalk theme updated to:', newIsDark ? 'dark' : 'light');
+                } catch (error) {
+                  console.error('Failed to update Artalk theme:', error);
+                  // 如果更新失败，重新初始化
+                  const artalkEl = document.querySelector('#artalk');
+                  if (artalkEl) {
+                    artalkEl.innerHTML = '';
+                    const newInstance = window.Artalk.init({
+                      el: config.el,
+                      pageKey: config.pageKey,
+                      pageTitle: config.pageTitle || document.title,
+                      server: config.server,
+                      site: config.site,
+                      darkMode: newIsDark,
+                    });
+                    window.artalkInstance = newInstance;
+                    // 重新应用主题类
+                    setTimeout(() => updateArtalkTheme(newIsDark), 100);
+                  }
+                }
+              }
+            }
+          });
+        });
+        
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+        
+      } catch (error) {
+        console.error('Artalk initialization failed:', error);
+      }
+    };
+    
+    script.onerror = (error) => {
+      console.error('Artalk script loading failed:', error);
+    };
+    
+    document.body.appendChild(script);
+  }
+  
+  // 监听加载评论事件
+  document.addEventListener("loadComment", () => {
+    loadArtalk();
+  }, { once: true });
+  
+  // 页面加载完成后自动加载Artalk
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded event triggered for Artalk');
+    if (!document.querySelector('script[src*="Artalk.js"]')) {
+      console.log('Artalk not loaded yet, loading now...');
+      loadArtalk();
+    }
+  });
+  
+  console.log('Artalk component initialized');
+</script>

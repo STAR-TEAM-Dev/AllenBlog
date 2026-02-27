@@ -1,0 +1,228 @@
+---
+import { fetchEch0Posts } from "../utils/ech0-api";
+
+// 从Ech0 API获取动态数据（服务器端）
+const essayData = await fetchEch0Posts("https://say.allen2030.com");
+
+// 检查是否需要客户端获取（如果只有备用数据）
+const needsClientFetch = essayData.length === 1 && essayData[0].tags?.includes('系统');
+---
+
+<div class="essay-carousel-container w-full py-4" data-needs-fetch={needsClientFetch ? "true" : "false"}>
+  <div class="max-w-[var(--page-width)] mx-auto px-4">
+    <div class="essay-carousel relative overflow-hidden card-base card-shadow card-glass cursor-pointer h-[40px]" onclick="window.location.href='/essay/'">
+      <div class="carousel-track flex flex-col transition-transform duration-500 ease-in-out" id="carousel-track">
+        {essayData.map((item) => (
+          <div 
+            class="carousel-item flex-shrink-0 w-full px-6 py-2 h-[40px] flex items-center justify-center"
+            data-content={item.content}
+            data-images={item.images ? 'true' : 'false'}
+          >
+            <div class="carousel-content w-full text-center">
+              <p class="text-content">{item.images ? '[图片]' : item.content}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <!-- 轮播指示器 -->
+      <div class="carousel-indicators absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-1" id="carousel-indicators">
+        {essayData.map((_, index) => (
+          <button 
+            class={`indicator w-1 h-1 rounded-full transition-all ${index === 0 ? 'bg-primary w-3' : 'bg-muted'}`}
+            data-index={index}
+            onclick="event.stopPropagation();"
+          ></button>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 快速客户端获取RSS数据
+  async function fetchCarouselData() {
+    const container = document.querySelector('.essay-carousel-container') as HTMLElement | null;
+    if (!container || container.dataset.needsFetch !== 'true') {
+      return; // 不需要客户端获取
+    }
+
+    try {
+      console.log('Carousel: Client-side fetching RSS...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 800); // 800ms超时
+      
+      const response = await fetch('https://say.allen2030.com/rss', {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const xmlText = await response.text();
+      
+      // 快速解析RSS
+      const entries = parseCarouselRSS(xmlText);
+      console.log('Carousel: Parsed', entries.length, 'entries');
+      
+      if (entries.length > 0) {
+        updateCarouselContent(entries);
+      }
+    } catch (error) {
+      console.error('Carousel: Fetch error', error);
+    }
+  }
+
+  // 快速解析RSS（简化版）
+  function parseCarouselRSS(xmlText: string) {
+    const entries: Array<{content: string, hasImages: boolean}> = [];
+    const entryRegex = /<entry>[\s\S]*?<summary[^>]*>([\s\S]*?)<\/summary>[\s\S]*?<\/entry>/gi;
+    let match;
+    
+    while ((match = entryRegex.exec(xmlText)) !== null && entries.length < 10) {
+      const summary = match[1]
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"');
+      
+      const hasImages = summary.includes('<img');
+      const content = summary.replace(/<[^>]*>/g, '').trim() || '[图片]';
+      
+      entries.push({ content: hasImages ? '[图片]' : content, hasImages });
+    }
+    
+    return entries;
+  }
+
+  // 更新轮播内容
+  function updateCarouselContent(entries: Array<{content: string, hasImages: boolean}>) {
+    const track = document.getElementById('carousel-track');
+    const indicators = document.getElementById('carousel-indicators');
+    
+    if (!track || !indicators) return;
+
+    // 生成新的轮播项HTML
+    const itemsHTML = entries.map((entry, index) => `
+      <div 
+        class="carousel-item flex-shrink-0 w-full px-6 py-2 h-[40px] flex items-center justify-center"
+      >
+        <div class="carousel-content w-full text-center">
+          <p class="text-content">${entry.content}</p>
+        </div>
+      </div>
+    `).join('');
+
+    // 生成新的指示器HTML
+    const indicatorsHTML = entries.map((_, index) => `
+      <button 
+        class="indicator w-1 h-1 rounded-full transition-all ${index === 0 ? 'bg-primary w-3' : 'bg-muted'}"
+        data-index="${index}"
+        onclick="event.stopPropagation();"
+      ></button>
+    `).join('');
+
+    // 更新DOM
+    track.innerHTML = itemsHTML;
+    indicators.innerHTML = indicatorsHTML;
+
+    // 重新初始化轮播
+    initCarousel();
+  }
+
+  // 初始化轮播
+  function initCarousel() {
+    const track = document.getElementById('carousel-track');
+    const items = document.querySelectorAll('.carousel-item');
+    const indicators = document.querySelectorAll('.indicator');
+    
+    if (!track || !items.length) return;
+    
+    let currentIndex = 0;
+    const itemHeight = 40;
+    
+    function updateCarousel() {
+      const offset = -currentIndex * itemHeight;
+      if (track) {
+        track.style.transform = `translateY(${offset}px)`;
+      }
+      
+      indicators.forEach((indicator, index) => {
+        if (index === currentIndex) {
+          indicator.classList.add('bg-primary', 'w-3');
+          indicator.classList.remove('bg-muted');
+        } else {
+          indicator.classList.remove('bg-primary', 'w-3');
+          indicator.classList.add('bg-muted');
+        }
+      });
+    }
+    
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % items.length;
+      updateCarousel();
+    }
+    
+    // 指示器点击事件
+    indicators.forEach(indicator => {
+      indicator.addEventListener('click', () => {
+        currentIndex = parseInt(indicator.getAttribute('data-index') || '0');
+        updateCarousel();
+      });
+    });
+    
+    // 清除旧的定时器
+    if ((window as any).carouselInterval) {
+      clearInterval((window as any).carouselInterval);
+    }
+    
+    // 自动轮播
+    (window as any).carouselInterval = setInterval(nextSlide, 3000);
+    
+    // 窗口大小变化时重新计算
+    window.addEventListener('resize', () => {
+      updateCarousel();
+    });
+    
+    // 初始更新
+    updateCarousel();
+  }
+
+  // 立即执行获取（不等待DOMContentLoaded）
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initCarousel();
+      fetchCarouselData();
+    });
+  } else {
+    initCarousel();
+    fetchCarouselData();
+  }
+  
+  // 同时立即尝试获取，确保1秒内显示
+  setTimeout(fetchCarouselData, 100);
+</script>
+
+<style scoped>
+.essay-carousel-container {
+  position: relative;
+  z-index: 20;
+}
+
+.carousel-btn {
+  z-index: 10;
+  cursor: pointer;
+}
+
+.carousel-indicators {
+  z-index: 10;
+}
+
+.indicator {
+  cursor: pointer;
+}
+</style>

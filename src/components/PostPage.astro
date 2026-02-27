@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getPostUrl, getPostUrlBySlug } from "@utils/url-utils";
+import { layoutConfig } from "@/config";
+import PostCard from "./PostCard.astro";
+
+const { page } = Astro.props;
+
+let delay = 0;
+const interval = 50;
+
+// 根据配置生成布局样式
+const isGridLayout = layoutConfig.postList.type === "grid";
+const gridClasses = isGridLayout
+	? `grid grid-cols-${layoutConfig.postList.grid.columns.sm} md2:grid-cols-${layoutConfig.postList.grid.columns.md2} md:grid-cols-${layoutConfig.postList.grid.columns.md} lg:grid-cols-${layoutConfig.postList.grid.columns.lg} ${layoutConfig.postList.grid.gap}`
+	: "flex flex-col md:gap-4";
+---
+
+<div class:list={["transition rounded-[var(--radius-large)] mb-4", isGridLayout ? "bg-transparent p-0" : "bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent", gridClasses]}>
+    {page.data.map((entry: CollectionEntry<"posts">) => (
+        <PostCard
+                entry={entry}
+                title={entry.data.title}
+                tags={entry.data.tags}
+                category={entry.data.category}
+                published={entry.data.published}
+                updated={entry.data.updated}
+                url={getPostUrl(entry)}
+                image={entry.data.image}
+                description={entry.data.description}
+                draft={entry.data.draft}
+                sticky={entry.data.sticky}
+                class:list="onload-animation"
+                style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+        ></PostCard>
+    ))}
+</div>

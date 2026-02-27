@@ -1,0 +1,60 @@
+---
+import { siteConfig } from "../../config";
+import ImageWrapper from "./ImageWrapper.astro";
+
+interface Props {
+	id?: string;
+	class?: string;
+	alt?: string;
+}
+
+const { id, alt } = Astro.props;
+const className = Astro.props.class;
+const bannerConfig = siteConfig.banner;
+const isVideo = bannerConfig.type === "video";
+const positionClass = {
+	top: "object-top",
+	center: "object-center",
+	bottom: "object-bottom",
+}[bannerConfig.position || "center"];
+---
+
+<div id={id} class:list={[className, 'relative overflow-hidden']}>
+    {isVideo ? (
+        <video 
+            src={bannerConfig.src}
+            class:list={["w-full h-full object-cover", positionClass]}
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+        >
+            您的浏览器不支持视频播放。
+        </video>
+    ) : (
+        <ImageWrapper 
+            src={bannerConfig.src} 
+            position={bannerConfig.position}
+            alt={alt || "Banner image of the blog"}
+            class="w-full h-full"
+        />
+    )}
+    
+    {bannerConfig.text?.enable && (
+        <div class="absolute inset-0 flex items-center justify-center z-20">
+            <div class="text-center text-white px-6 py-4">
+                {bannerConfig.text.title && (
+                    <h1 class="text-3xl md:text-5xl font-bold mb-2 drop-shadow-lg">
+                        {bannerConfig.text.title}
+                    </h1>
+                )}
+                {bannerConfig.text.subtitle && (
+                    <p class="text-lg md:text-xl opacity-90 drop-shadow-md">
+                        {bannerConfig.text.subtitle}
+                    </p>
+                )}
+            </div>
+        </div>
+    )}
+</div>

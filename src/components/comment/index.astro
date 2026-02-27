@@ -1,0 +1,39 @@
+---
+import { commentConfig } from "@/config";
+import Artalk from "./Artalk.astro";
+import Twikoo from "./Twikoo.astro";
+
+interface Props {
+	post?: any;
+	path?: string;
+}
+
+// 如果直接传递了path，使用path；否则从post对象构建path
+let path: string;
+if (Astro.props.path) {
+	path = Astro.props.path;
+} else {
+	const { id, data, slug } = Astro.props.post || {};
+	// 优先使用customSlug，如果没有则使用默认的slug
+	const finalSlug = data?.customSlug || slug;
+	if (finalSlug) {
+		// 确保文章页面路径以 /posts 开头
+		path = `/posts/${finalSlug}`;
+	} else {
+		// 对于其他页面，使用当前URL路径
+		let currentPath = Astro.url.pathname;
+		// 移除末尾的斜杠以保持一致性（除了根路径）
+		path = currentPath.replace(/\/$/, "") || "/";
+	}
+}
+
+// 检查评论系统是否启用以及使用哪种类型
+const isCommentEnabled = commentConfig?.enable;
+const commentService = isCommentEnabled ? commentConfig?.type : "";
+---
+{isCommentEnabled && (
+<div class="card-base p-6 mb-4 mt-4">
+  {commentService === 'twikoo' && <Twikoo path={path} />}
+  {commentService === 'artalk' && <Artalk path={path} />}
+</div>
+)}

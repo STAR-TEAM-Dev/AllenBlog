@@ -1,0 +1,40 @@
+---
+import type { MarkdownHeading } from "astro";
+import { sidebarConfig } from "../../config";
+import Categories from "./Categories.astro";
+import Hitokoto from "./Hitokoto.astro";
+import Profile from "./Profile.astro";
+import Tag from "./Tags.astro";
+import WidgetLayout from "./WidgetLayout.astro";
+
+interface Props {
+	class?: string;
+	headings?: MarkdownHeading[];
+}
+
+const className = Astro.props.class;
+---
+{sidebarConfig.enable && (
+<div id="sidebar" class:list={[className, "w-full"]}>
+    <div class="flex flex-col w-full gap-4 mb-4">
+        {sidebarConfig.cards.profile && <Profile></Profile>}
+    </div>
+    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+        {sidebarConfig.cards.categories && <Categories class="onload-animation" style="animation-delay: 150ms"></Categories>}
+        {sidebarConfig.cards.tags && <Tag class="onload-animation" style="animation-delay: 200ms"></Tag>}
+        {sidebarConfig.cards.hitokoto && <Hitokoto class="onload-animation" style="animation-delay: 300ms"></Hitokoto>}
+        {sidebarConfig.cards.advertisement && (
+        <WidgetLayout 
+            name={sidebarConfig.advertisement.showLabel ? sidebarConfig.advertisement.labelText : ""} 
+            id="advertisement" 
+            class="onload-animation" 
+            style="animation-delay: 250ms"
+        >
+            <a href={sidebarConfig.advertisement.url} target="_blank" rel="noopener noreferrer" class="block">
+                <img src={sidebarConfig.advertisement.src} alt={sidebarConfig.advertisement.alt} class="w-full rounded-lg" />
+            </a>
+        </WidgetLayout>
+        )}
+    </div>
+</div>
+)}

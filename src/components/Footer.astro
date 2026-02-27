@@ -1,0 +1,33 @@
+---
+
+import { profileConfig } from "../config";
+import { url } from "../utils/url-utils";
+---
+
+<div class="card-base max-w-[var(--page-width)] min-h-[4.5rem] rounded-b-none mx-auto flex items-center px-6 justify-between">
+
+<!--左侧信息 -->
+    <div class="transition text-50 text-sm max-md:text-left mt-2">
+        © 2026 {profileConfig.name}. All Rights Reserved. 保留所有权利 /
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a>
+    <!--
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href={url('sitemap-index.xml')}>Sitemap</a>
+    -->
+        <br>
+        Powered by
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> &
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/duancyblog/AllenBlog/">AllenBlog</a> &
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href="https://edgeone.ai">EdgeOne</a>
+    </div>
+
+<!--运行时间 -->
+    <script type="text/javascript">function runtime(){const t=new Date("01/01/2026 00:00:00"),n=new Date,s=n-t,e=Math.floor(s/1e3),o=Math.floor(e/86400),i=Math.floor(e%86400/3600),a=Math.floor(e%3600/60),r=e%60;document.getElementById("runningtime").innerHTML=`⭐本站已运行: ${o}天${i}小时${a}分${r}秒 ☁️`}setInterval(runtime,1e3)</script>
+    <div class="transition text-50 text-sm text-center hidden md:block"><p id="runningtime"> </p></div>
+
+<!--右侧备案等信息 -->
+    <div class="transition text-50 text-sm max-md:text-right mt-2">
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href={'https://beian.miit.gov.cn'}>冀ICP备2025141090号-1</a>
+        <br>
+        <a class="link text-[var(--primary)] font-medium" target="_blank" href={'https://beian.mps.gov.cn/'}>萌ICP备20245060号</a>
+    </div>
+</div>

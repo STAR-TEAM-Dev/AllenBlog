@@ -1,0 +1,37 @@
+---
+import { getEntry, render } from "astro:content";
+import Comment from "@components/comment/index.astro";
+import Markdown from "@components/misc/Markdown.astro";
+import { commentConfig } from "../config";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+const commentsPost = await getEntry("spec", "comments");
+
+if (!commentsPost) {
+	throw new Error("Comments page content not found");
+}
+
+const { Content } = await render(commentsPost);
+
+// 创建一个虚拟的post对象用于评论组件，使用customSlug避免posts前缀
+const virtualPost = {
+	slug: "comments",
+	data: {
+		title: i18n(I18nKey.comments),
+		customSlug: "comments",
+	},
+};
+---
+<MainGridLayout title="留言板" description="留言板">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full ">
+            <Markdown class="mt-2">
+                <Content />
+            </Markdown>
+        </div>
+    </div>
+    
+    <Comment path="/comments/" />
+</MainGridLayout>
