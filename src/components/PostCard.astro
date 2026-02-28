@@ -40,6 +40,8 @@ const {
 const className = Astro.props.class;
 
 const hasCover = image !== undefined && image !== null && image !== "";
+const isPasswordProtected =
+	entry.data.password !== undefined && entry.data.password !== "";
 
 const coverWidth = "28%";
 
@@ -59,6 +61,12 @@ const isGridLayout = layoutConfig.postList.type === "grid";
                     置顶
                 </div>
             )}
+            {isPasswordProtected && (
+                <div class="absolute top-0 right-0 z-30 bg-[var(--primary)] text-white text-xs font-bold px-2 py-1 rounded-bl-md flex items-center gap-1">
+                    <Icon name="material-symbols:lock" class="text-xs"></Icon>
+                    加密
+                </div>
+            )}
             <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/30 group-active:bg-black/50 transition"></div>
             <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center ">
                 <Icon name="material-symbols:chevron-right-rounded"
@@ -71,7 +79,11 @@ const isGridLayout = layoutConfig.postList.type === "grid";
                 </ImageWrapper>
             ) : (
                 <div class="w-full h-full bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary)]/5 flex items-center justify-center">
-                    <Icon name="material-symbols:article-outline" class="text-6xl text-[var(--primary)]/40"></Icon>
+                    {isPasswordProtected ? (
+                        <Icon name="material-symbols:lock" class="text-6xl text-[var(--primary)]/60"></Icon>
+                    ) : (
+                        <Icon name="material-symbols:article-outline" class="text-6xl text-[var(--primary)]/40"></Icon>
+                    )}
                 </div>
             )}
         </a>
@@ -90,19 +102,28 @@ const isGridLayout = layoutConfig.postList.type === "grid";
 
             <!-- description -->
             <div class="transition text-75 mb-3.5 line-clamp-3 flex-1">
-                { description || remarkPluginFrontmatter.excerpt }
+                {isPasswordProtected ? (
+                    <div class="flex items-center gap-2 text-[var(--primary)]">
+                        <Icon name="material-symbols:lock" class="text-sm"></Icon>
+                        <span>该文章已加密，需要密码访问</span>
+                    </div>
+                ) : (
+                    description || remarkPluginFrontmatter.excerpt
+                )}
             </div>
 
             <!-- word count and read time  -->
-            <div class="text-sm text-black/30 dark:text-white/30 flex gap-4 transition">
-                <div>
-                    {remarkPluginFrontmatter.words} {" " + i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}
+            {!isPasswordProtected && (
+                <div class="text-sm text-black/30 dark:text-white/30 flex gap-4 transition">
+                    <div>
+                        {remarkPluginFrontmatter.words} {" " + i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}
+                    </div>
+                    <div>|</div>
+                    <div>
+                        {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
+                    </div>
                 </div>
-                <div>|</div>
-                <div>
-                    {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
-                </div>
-            </div>
+            )}
         </div>
     </div>
 ) : (
@@ -124,6 +145,12 @@ const isGridLayout = layoutConfig.postList.type === "grid";
                         </span>
                     )}
                     {title}
+                    {isPasswordProtected && (
+                        <span class="inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)] ml-2">
+                            <Icon name="material-symbols:lock" class="text-xs"></Icon>
+                            加密
+                        </span>
+                    )}
                     <Icon class="inline text-[2rem] text-[var(--primary)] md:hidden translate-y-0.5 absolute" name="material-symbols:chevron-right-rounded" ></Icon>
                     <Icon class="text-[var(--primary)] text-[2rem] transition hidden md:inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" name="material-symbols:chevron-right-rounded"></Icon>
                 </a>
@@ -133,19 +160,28 @@ const isGridLayout = layoutConfig.postList.type === "grid";
 
                 <!-- description -->
                 <div class:list={["transition text-75 mb-3.5 pr-4", {"line-clamp-2 md:line-clamp-1": !description}]}>
-                    { description || remarkPluginFrontmatter.excerpt }
+                    {isPasswordProtected ? (
+                        <div class="flex items-center gap-2 text-[var(--primary)]">
+                            <Icon name="material-symbols:lock" class="text-sm"></Icon>
+                            <span>该文章已加密，需要密码访问</span>
+                        </div>
+                    ) : (
+                        description || remarkPluginFrontmatter.excerpt
+                    )}
                 </div>
 
                 <!-- word count and read time  -->
-                <div class="text-sm text-black/30 dark:text-white/30 flex gap-4 transition">
-                    <div>
-                        {remarkPluginFrontmatter.words} {" " + i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}
+                {!isPasswordProtected && (
+                    <div class="text-sm text-black/30 dark:text-white/30 flex gap-4 transition">
+                        <div>
+                            {remarkPluginFrontmatter.words} {" " + i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}
+                        </div>
+                        <div>|</div>
+                        <div>
+                            {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
+                        </div>
                     </div>
-                    <div>|</div>
-                    <div>
-                        {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
-                    </div>
-                </div>
+                )}
             </div>
 
             {hasCover && <a href={url} aria-label={title}

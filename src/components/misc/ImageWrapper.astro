@@ -62,6 +62,7 @@ const imageStyle = `object-position: ${position}`;
             class={`${imageClass} image-content opacity-0 transition-opacity duration-300`}
             style={imageStyle}
             loading="lazy"
+            decoding="async"
         />
     )}
     {!isLocal && (
@@ -71,6 +72,7 @@ const imageStyle = `object-position: ${position}`;
             class={`${imageClass} image-content opacity-0 transition-opacity duration-300`}
             style={imageStyle}
             loading="lazy"
+            decoding="async"
         />
     )}
 </div>
@@ -80,8 +82,8 @@ const imageStyle = `object-position: ${position}`;
         const imageWrappers = document.querySelectorAll('.image-wrapper');
         
         imageWrappers.forEach(wrapper => {
-            const img = wrapper.querySelector('.image-content');
-            const placeholder = wrapper.querySelector('.image-placeholder');
+            const img = wrapper.querySelector('.image-content') as HTMLImageElement;
+            const placeholder = wrapper.querySelector('.image-placeholder') as HTMLElement;
             
             if (img && placeholder) {
                 // 图片加载完成处理

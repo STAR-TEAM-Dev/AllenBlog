@@ -45,7 +45,10 @@ export default defineConfig({
 			containers: ["main", "#toc"],
 			smoothScrolling: true,
 			cache: true,
-			preload: true,
+			preload: {
+				enabled: true,
+				throttle: 5,
+			},
 			accessibility: true,
 			updateHead: true,
 			updateBodyClass: false,
@@ -172,7 +175,15 @@ export default defineConfig({
 
 	vite: {
 		build: {
+			cssCodeSplit: true,
+			minify: 'esbuild',
 			rollupOptions: {
+				output: {
+					manualChunks: {
+						'vendor': ['svelte'],
+						'icons': ['@iconify/svelte'],
+					},
+				},
 				onwarn(warning, warn) {
 					// temporarily suppress this warning
 					if (
@@ -184,6 +195,9 @@ export default defineConfig({
 					warn(warning);
 				},
 			},
+		},
+		ssr: {
+			noExternal: ['@iconify/svelte'],
 		},
 	},
 
