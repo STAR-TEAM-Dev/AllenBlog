@@ -5,9 +5,10 @@ import { siteConfig } from "../../config";
 interface Props {
 	class?: string;
 	headings: MarkdownHeading[];
+	isPasswordProtected?: boolean;
 }
 
-let { headings = [] } = Astro.props;
+let { headings = [], isPasswordProtected = false } = Astro.props;
 
 let minDepth = 10;
 for (const heading of headings) {
@@ -31,7 +32,7 @@ let heading1Count = 1;
 
 const maxLevel = siteConfig.toc.depth;
 ---
-{isPostsRoute &&
+{isPostsRoute && !isPasswordProtected &&
 <table-of-contents class:list={[className, "group"]}>
     {headings.filter((heading) => heading.depth < minDepth + maxLevel).map((heading) =>
             <a href={`#${heading.slug}`} class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl
@@ -58,6 +59,19 @@ const maxLevel = siteConfig.toc.depth;
     <div id="active-indicator" class:list={[{'hidden': headings.length == 0}, "-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-xl transition-all " +
         "group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"]}></div>
 </table-of-contents>}
+
+{isPostsRoute && isPasswordProtected &&
+<div class="px-2 py-4 text-center">
+    <div class="text-neutral-500 dark:text-neutral-400 text-sm">
+        <span class="inline-flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            文章已加密
+        </span>
+        <p class="text-xs mt-1 text-neutral-400 dark:text-neutral-500">验证密码后查看目录</p>
+    </div>
+</div>}
 
 <script>
 class TableOfContents extends HTMLElement {

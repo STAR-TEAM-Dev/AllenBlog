@@ -23,6 +23,15 @@ const postsCollection = defineCollection({
 		nextSlug: z.string().default(""),
 	}),
 });
+
+const noticeCollection = defineCollection({
+	schema: z.object({
+		title: z.string().optional().default("更新公告"),
+		date: z.string().optional(),
+	}),
+});
+
 export const collections = {
 	posts: postsCollection,
+	notice: noticeCollection,
 };

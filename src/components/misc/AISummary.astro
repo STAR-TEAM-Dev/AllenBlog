@@ -54,7 +54,7 @@ if (!content || content.trim() === "") {
       }
 
       const content = textElement.getAttribute('data-content');
-      if (!content) {
+      if (!content || !textElement) {
         return;
       }
 
@@ -69,13 +69,14 @@ if (!content || content.trim() === "") {
       const typeSpeed = 30; // 打字速度（毫秒）
       
       function typeWriter() {
+        if (!textElement || !content) return;
         if (index < content.length) {
           textElement.textContent += content.charAt(index);
           index++;
           setTimeout(typeWriter, typeSpeed);
         } else {
           // 打字完成后隐藏光标（通过CSS控制）
-          textElement.classList.add('typing-complete');
+          textElement?.classList.add('typing-complete');
         }
       }
       

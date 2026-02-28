@@ -1,5 +1,6 @@
 ---
 import { fetchEch0Posts } from "../utils/ech0-api";
+import { Icon } from "astro-icon/components";
 
 // 从Ech0 API获取动态数据（服务器端）
 const essayData = await fetchEch0Posts("https://say.allen2030.com");
@@ -10,11 +11,16 @@ const needsClientFetch = essayData.length === 1 && essayData[0].tags?.includes('
 
 <div class="essay-carousel-container w-full py-4" data-needs-fetch={needsClientFetch ? "true" : "false"}>
   <div class="max-w-[var(--page-width)] mx-auto px-4">
-    <div class="essay-carousel relative overflow-hidden card-base card-shadow card-glass cursor-pointer h-[40px]" onclick="window.location.href='/essay/'">
+    <div class="essay-carousel relative overflow-hidden card-base card-shadow card-glass cursor-pointer h-[54px]" onclick="window.location.href='/essay/'">
+      <!-- 左侧图标 -->
+      <div class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-[var(--primary)]">
+        <Icon name="material-symbols:volume-up-rounded" class="w-5 h-5" />
+      </div>
+      
       <div class="carousel-track flex flex-col transition-transform duration-500 ease-in-out" id="carousel-track">
         {essayData.map((item) => (
           <div 
-            class="carousel-item flex-shrink-0 w-full px-6 py-2 h-[40px] flex items-center justify-center"
+            class="carousel-item flex-shrink-0 w-full px-14 py-2 h-[54px] flex items-center justify-center"
             data-content={item.content}
             data-images={item.images ? 'true' : 'false'}
           >
@@ -23,6 +29,11 @@ const needsClientFetch = essayData.length === 1 && essayData[0].tags?.includes('
             </div>
           </div>
         ))}
+      </div>
+      
+      <!-- 右侧图标 -->
+      <div class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-[var(--primary)]">
+        <Icon name="material-symbols:open-in-new-rounded" class="w-5 h-5" />
       </div>
       
       <!-- 轮播指示器 -->
@@ -109,7 +120,7 @@ const needsClientFetch = essayData.length === 1 && essayData[0].tags?.includes('
     // 生成新的轮播项HTML
     const itemsHTML = entries.map((entry, index) => `
       <div 
-        class="carousel-item flex-shrink-0 w-full px-6 py-2 h-[40px] flex items-center justify-center"
+        class="carousel-item flex-shrink-0 w-full px-14 py-2 h-[54px] flex items-center justify-center"
       >
         <div class="carousel-content w-full text-center">
           <p class="text-content">${entry.content}</p>
@@ -143,7 +154,7 @@ const needsClientFetch = essayData.length === 1 && essayData[0].tags?.includes('
     if (!track || !items.length) return;
     
     let currentIndex = 0;
-    const itemHeight = 40;
+    const itemHeight = 54;
     
     function updateCarousel() {
       const offset = -currentIndex * itemHeight;

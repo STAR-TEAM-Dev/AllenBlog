@@ -26,6 +26,7 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	isPasswordProtected?: boolean;
 }
 
 const {
@@ -35,6 +36,7 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	isPasswordProtected = false,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
@@ -136,7 +138,7 @@ const mainPanelTop = siteConfig.banner.enable
             <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
                 <div id="toc" class="w-full h-full transition-swup-fade ">
                     <div class="h-8 w-full"></div>
-                    <TOC headings={headings}></TOC>
+                    <TOC headings={headings} isPasswordProtected={isPasswordProtected}></TOC>
                     <div class="h-8 w-full"></div>
                 </div>
             </div>

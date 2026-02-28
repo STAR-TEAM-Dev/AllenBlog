@@ -5,12 +5,34 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { fetchEch0Posts } from "../utils/ech0-api";
+import { profileConfig } from "../config";
 
 // 从Ech0 API获取动态数据（服务器端）
 let essays = await fetchEch0Posts("https://say.allen2030.com");
 
 // 如果服务器端获取失败（只有一条备用数据），标记需要客户端获取
 const needsClientFetch = essays.length === 1 && essays[0].tags.includes("系统");
+
+// 处理每条说说数据，提取#标签
+const processedEssays = essays.map(essay => {
+    // 从内容中提取#标签
+    const hashTags = essay.content.match(/#[^\s#]+/g) || [];
+    const cleanHashTags = hashTags.map((tag: string) => tag.replace('#', ''));
+    
+    // 合并标签并去重
+    const allTags = [...cleanHashTags, ...(essay.tags || [])];
+    const uniqueTags = [...new Set(allTags)].slice(0, 3);
+    
+    // 过滤掉内容中的#标签
+    const cleanContent = essay.content.replace(/#[^\s#]+/g, '').trim();
+    
+    return {
+        ...essay,
+        cleanContent,
+        displayTags: uniqueTags,
+        hasTags: uniqueTags.length > 0
+    };
+});
 
 // 为评论区创建一个模拟的post对象
 const mockPost = {
@@ -22,35 +44,51 @@ const mockPost = {
 ---
 
 <MainGridLayout title="瞬间" description="记录生活中的美好瞬间">
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-8">
-        <div class="card-base z-10 px-9 py-6 relative w-full">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
             <h1 class="text-4xl font-bold mb-6 text-neutral-900 dark:text-white">说说</h1>
-            <p class="text-neutral-600 dark:text-neutral-400 mb-8">Ech0 API智能获取</p>
             
-            <div id="essays-container" class="space-y-6" data-needs-fetch={needsClientFetch ? "true" : "false"}>
-                {essays.map((essay) => (
-                    <div class="essay-item bg-[var(--card-bg)] rounded-lg p-6 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md">
-                        <!-- 内容 -->
-                        <div class="essay-content text-90 text-lg leading-relaxed mb-4">
-                            {essay.content}
+            <div id="essays-container" class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4" data-needs-fetch={needsClientFetch ? "true" : "false"}>
+                {processedEssays.map((essay) => (
+                    <div class="essay-item break-inside-avoid bg-[var(--card-bg)] rounded-xl p-4 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md">
+                        <!-- 顶部：头像、用户名、时间 -->
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-[var(--btn-card-bg-hover)] flex-shrink-0">
+                                <img 
+                                    src={profileConfig.avatar} 
+                                    alt={profileConfig.name}
+                                    class="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1">
+                                    <span class="font-medium text-90 text-sm truncate">{profileConfig.name}</span>
+                                    <Icon name="material-symbols:verified-rounded" class="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                </div>
+                                <div class="text-xs text-50">{essay.time}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 内容（已过滤#标签） -->
+                        <div class="essay-content text-90 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                            {essay.cleanContent}
                         </div>
                         
                         <!-- 图片 -->
                         {essay.images && essay.images.length > 0 && (
-                            <div class="essay-images mb-4">
+                            <div class="essay-images mb-3">
                                 <div class:list={[
-                                    "custom-md grid gap-3",
+                                    "grid gap-2",
                                     essay.images.length === 1 ? "grid-cols-1" : 
                                     essay.images.length === 2 ? "grid-cols-2" :
-                                    essay.images.length === 3 ? "grid-cols-3" :
-                                    "grid-cols-2 md:grid-cols-3"
+                                    "grid-cols-2"
                                 ]}>
-                                    {essay.images.map((image, index) => (
-                                        <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)]">
+                                    {essay.images.slice(0, 4).map((image, index) => (
+                                        <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)] aspect-video">
                                             <img 
                                                 src={image} 
                                                 alt={`瞬间图片 ${index + 1}`}
-                                                class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                                                 loading="lazy"
                                             />
                                         </div>
@@ -59,41 +97,30 @@ const mockPost = {
                             </div>
                         )}
                         
-                        <!-- 底部信息 -->
-                        <div class="essay-meta flex items-center justify-between text-sm text-75">
-                            <div class="flex items-center gap-4">
-                                <!-- 时间 -->
-                                <div class="flex items-center gap-1">
-                                    <Icon name="material-symbols:schedule" class="text-base" />
-                                    <span>{essay.time}</span>
-                                </div>
-                                
-                                <!-- 标签 -->
-                                {essay.tags && essay.tags.length > 0 && (
-                                    <div class="flex items-center gap-2">
-                                        <Icon name="material-symbols:tag" class="text-base" />
-                                        <div class="flex gap-2">
-                                            {essay.tags.map((tag) => (
-                                                <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-full text-xs">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
+                        <!-- 底部标签 -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1 flex-wrap">
+                                {essay.hasTags ? (
+                                    essay.displayTags.map((tag: string) => (
+                                        <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-md text-xs text-75">
+                                            {tag}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-md text-xs text-50">
+                                        无标签
+                                    </span>
                                 )}
                             </div>
                             
                             <!-- 评论按钮 -->
-                            <div>
-                                <button 
-                                    class="flex items-center gap-1 text-sm hover:text-primary transition-colors"
-                                    data-content={`${essay.content}`}
-                                    onclick="window.commentOnPost(this)"
-                                >
-                                    <Icon name="material-symbols:chat" class="text-base" />
-                                    <span>评论</span>
-                                </button>
-                            </div>
+                            <button 
+                                class="flex items-center gap-1 text-xs text-75 hover:text-primary transition-colors p-1 rounded hover:bg-[var(--btn-card-bg-hover)]"
+                                data-content={`${essay.content}`}
+                                onclick="window.commentOnPost(this)"
+                            >
+                                <Icon name="material-symbols:chat-bubble-outline-rounded" class="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -102,11 +129,10 @@ const mockPost = {
     </div>
 
     <!-- 评论区 -->
-    <div id="comments-section" class="twikoo-container">
+    <div id="comments-section" class="twikoo-container mt-8">
         <Comment path="/essay/" />
     </div>
 </MainGridLayout>
-
 
 
 <style>
@@ -127,7 +153,6 @@ const mockPost = {
     
     .essay-content {
         word-wrap: break-word;
-        white-space: pre-wrap;
     }
 </style>
 
@@ -251,111 +276,155 @@ const mockPost = {
                 .replace(/&gt;/g, '>')
                 .replace(/&amp;/g, '&')
                 .replace(/&quot;/g, '"')
-                .replace(/&#34;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/&#xA;/g, '\n');
-            
-            // 提取纯文本
-            const content = decodedSummary.replace(/<[^>]*>/g, '').trim() || '[图片]';
+                .replace(/&#39;/g, "'");
             
             // 提取图片
             const images: string[] = [];
-            const imgRegex = /<img[^>]*src=["']([^"']+)["']/gi;
+            const imgRegex = /<img[^>]+src="([^"]+)"/g;
             let imgMatch: RegExpExecArray | null = null;
             while (true) {
                 imgMatch = imgRegex.exec(decodedSummary);
                 if (imgMatch === null) break;
-                let url = imgMatch[1];
-                if (url.startsWith('http://')) {
-                    url = url.replace('http://', 'https://');
-                }
-                images.push(url);
+                images.push(imgMatch[1]);
             }
             
-            // 格式化日期
-            const date = updated ? new Date(updated).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            // 提取纯文本内容
+            const textContent = decodedSummary
+                .replace(/<[^>]*>/g, '')
+                .trim();
+            
+            // 提取标签
+            const tags: string[] = [];
+            const categoryRegex = /<category[^>]*term="([^"]+)"/g;
+            let categoryMatch: RegExpExecArray | null = null;
+            while (true) {
+                categoryMatch = categoryRegex.exec(entryText);
+                if (categoryMatch === null) break;
+                tags.push(categoryMatch[1]);
+            }
+            
+            // 格式化时间
+            const date = new Date(updated);
+            const timeStr = date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
             
             entries.push({
-                id: index,
-                content,
-                time: date,
-                tags: ['生活'],
-                images: images.length > 0 ? images : undefined
+                content: textContent || '[图片]',
+                time: timeStr,
+                images: images,
+                tags: tags
             });
         }
         
-        return entries.sort((a, b) => b.id - a.id);
+        return entries;
     }
 
     // 渲染说说列表
-    function renderEssays(essays: any[]) {
+    function renderEssays(entries: any[]) {
         const container = document.getElementById('essays-container');
         if (!container) return;
         
-        container.innerHTML = essays.map(essay => `
-            <div class="essay-item bg-[var(--card-bg)] rounded-lg p-6 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md">
-                <div class="essay-content text-90 text-lg leading-relaxed mb-4">${escapeHtml(essay.content)}</div>
-                
-                ${essay.images && essay.images.length > 0 ? `
-                    <div class="essay-images mb-4">
-                        <div class="custom-md grid gap-3 ${essay.images.length === 1 ? 'grid-cols-1' : essay.images.length === 2 ? 'grid-cols-2' : essay.images.length === 3 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-3'}">
-                            ${essay.images.map((image: string, index: number) => `
-                                <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)]">
-                                    <img 
-                                        src="${image}" 
-                                        alt="瞬间图片 ${index + 1}"
-                                        class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                <div class="essay-meta flex items-center justify-between text-sm text-75">
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
-                            <span>${essay.time}</span>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 10V8h-4V4h-2v4h-4V4H8v4H4v2h4v4H4v2h4v4h2v-4h4v4h2v-4h4v-2h-4v-4h4zm-6 4h-4v-4h4v4z"/></svg>
-                            <div class="flex gap-2">
-                                ${essay.tags.map((tag: string) => `
-                                    <span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-full text-xs">${tag}</span>
-                                `).join('')}
+        // 获取头像和用户名
+        const avatarImg = document.querySelector('.essay-item img') as HTMLImageElement | null;
+        const userNameEl = document.querySelector('.essay-item .font-medium') as HTMLElement | null;
+        const avatar = avatarImg ? avatarImg.src : '/favicon/favicon-light-128.png';
+        const userName = userNameEl ? userNameEl.textContent : 'Allen';
+        
+        const html = entries.map((entry, index) => {
+            // 从内容中提取#标签
+            const hashTags = entry.content.match(/#[^\s#]+/g) || [];
+            const cleanHashTags = hashTags.map((tag: string) => tag.replace('#', ''));
+            const allTags = [...cleanHashTags, ...(entry.tags || [])];
+            const uniqueTags = [...new Set(allTags)].slice(0, 3);
+            const hasTags = uniqueTags.length > 0;
+            
+            // 过滤掉内容中的#标签
+            const cleanContent = entry.content.replace(/#[^\s#]+/g, '').trim();
+            
+            const imagesHtml = entry.images && entry.images.length > 0 ? `
+                <div class="essay-images mb-3">
+                    <div class="grid gap-2 ${entry.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}">
+                        ${entry.images.slice(0, 4).map((image: string, idx: number) => `
+                            <div class="rounded-lg overflow-hidden bg-[var(--btn-card-bg-hover)] aspect-video">
+                                <img 
+                                    src="${image}" 
+                                    alt="瞬间图片 ${idx + 1}"
+                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                    loading="lazy"
+                                />
                             </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+            
+            const tagsHtml = hasTags 
+                ? uniqueTags.map((tag: string) => `<span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-md text-xs text-75">${tag}</span>`).join('')
+                : `<span class="px-2 py-1 bg-[var(--btn-card-bg-hover)] rounded-md text-xs text-50">无标签</span>`;
+            
+            return `
+                <div class="essay-item break-inside-avoid bg-[var(--card-bg)] rounded-xl p-4 shadow-sm border border-[var(--line-divider)] transition-all hover:shadow-md" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full overflow-hidden bg-[var(--btn-card-bg-hover)] flex-shrink-0">
+                            <img 
+                                src="${avatar}" 
+                                alt="${userName}"
+                                class="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1">
+                                <span class="font-medium text-90 text-sm truncate">${userName}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </div>
+                            <div class="text-xs text-50">${entry.time}</div>
                         </div>
                     </div>
                     
-                    <div>
+                    <div class="essay-content text-90 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                        ${cleanContent}
+                    </div>
+                    
+                    ${imagesHtml}
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1 flex-wrap">
+                            ${tagsHtml}
+                        </div>
+                        
                         <button 
-                            class="flex items-center gap-1 text-sm hover:text-primary transition-colors"
-                            data-content="${escapeHtml(essay.content)}"
+                            class="flex items-center gap-1 text-xs text-75 hover:text-primary transition-colors p-1 rounded hover:bg-[var(--btn-card-bg-hover)]"
+                            data-content="${entry.content.replace(/"/g, '&quot;')}"
                             onclick="window.commentOnPost(this)"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-                            <span>评论</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+        
+        container.innerHTML = html;
     }
 
-    // HTML转义函数
-    function escapeHtml(text: string): string {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // 页面加载完成后执行客户端获取
+    // 立即执行获取（不等待DOMContentLoaded）
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fetchEch0PostsClient);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchEch0PostsClient();
+        });
     } else {
         fetchEch0PostsClient();
     }
+    
+    // 同时立即尝试获取，确保1秒内显示
+    setTimeout(fetchEch0PostsClient, 100);
 </script>

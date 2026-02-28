@@ -51,13 +51,15 @@ const postSlug = entry.data.customSlug || entry.slug;
 const hasPassword = !!entry.data.password;
 ---
 
-<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings} isPasswordProtected={hasPassword}>
     <style define:vars={{ 'card-opacity': cardConfig.opacity }}></style>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     
     <!-- 密码保护界面 -->
     {hasPassword && (
-        <PasswordProtect postSlug={postSlug} correctPassword={entry.data.password || ''} />
+        <div class="password-page-wrapper min-h-[calc(100vh-300px)] flex flex-col">
+            <PasswordProtect postSlug={postSlug} correctPassword={entry.data.password || ''} />
+        </div>
     )}
     
     <!-- 文章内容 -->

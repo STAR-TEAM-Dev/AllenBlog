@@ -4,7 +4,9 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import CustomContextMenu from "@components/CustomContextMenu.astro";
 import TitleBeautify from "@components/TitleBeautify.astro";
+import UpdateNotice from "@components/UpdateNotice.astro";
 import { cardConfig, cursorConfig, profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -243,6 +245,12 @@ const backgroundStyle = pageBackgroundConfig.enable
 
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
+
+		<!-- 自定义右键菜单 -->
+		<CustomContextMenu />
+
+		<!-- 更新公告弹窗 -->
+		<UpdateNotice />
 	</body>
 </html>
 

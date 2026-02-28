@@ -1,0 +1,109 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getCategoryList, getSortedPosts } from "@utils/content-utils";
+import { Icon } from "astro-icon/components";
+
+const categories = await getCategoryList();
+const posts = await getSortedPosts();
+
+// 为每个分类计算文章数量
+const categoriesWithPosts = categories.map(cat => {
+    const categoryPosts = posts.filter(post => {
+        const postCategory = post.data.category || "未分类";
+        return postCategory === cat.name;
+    });
+    return {
+        ...cat,
+        posts: categoryPosts
+    };
+});
+
+// 按文章数量排序
+const sortedCategories = categoriesWithPosts.sort((a, b) => b.posts.length - a.posts.length);
+---
+
+<MainGridLayout title="文章分类" description="按分类浏览文章">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+            <h1 class="text-4xl font-bold mb-2 text-neutral-900 dark:text-white">文章分类</h1>
+            <p class="text-neutral-500 dark:text-neutral-400 mb-8">共 {sortedCategories.length} 个分类，{posts.length} 篇文章</p>
+            
+            <!-- 分类卡片网格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedCategories.map((category, index) => (
+                    <a 
+                        href={category.url}
+                        class="group relative bg-[var(--card-bg)] rounded-xl p-5 border border-[var(--line-divider)] transition-all duration-300 hover:shadow-lg hover:border-[var(--primary)]/30 hover:-translate-y-1"
+                        style={`animation: fadeInUp 0.5s ease-out ${index * 0.1}s both;`}
+                    >
+                        <!-- 背景装饰 -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                        
+                        <div class="relative z-10">
+                            <!-- 顶部：图标和文章数 -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center">
+                                    <Icon name="material-symbols:folder-outline-rounded" class="w-5 h-5 text-[var(--primary)]" />
+                                </div>
+                                <span class="text-xs text-50 bg-[var(--btn-card-bg-hover)] px-2 py-1 rounded-full">
+                                    {category.posts.length} 篇
+                                </span>
+                            </div>
+                            
+                            <!-- 分类名称 -->
+                            <h3 class="text-lg font-semibold text-90 mb-2 group-hover:text-[var(--primary)] transition-colors">
+                                {category.name}
+                            </h3>
+                            
+                            <!-- 最新文章预览 -->
+                            <div class="space-y-1">
+                                {category.posts.slice(0, 2).map((post) => (
+                                    <p class="text-xs text-50 truncate">
+                                        {post.data.title}
+                                    </p>
+                                ))}
+                                {category.posts.length > 2 && (
+                                    <p class="text-xs text-30">还有 {category.posts.length - 2} 篇文章...</p>
+                                )}
+                            </div>
+                            
+                            <!-- 底部箭头 -->
+                            <div class="flex items-center justify-end mt-4">
+                                <Icon 
+                                    name="material-symbols:arrow-forward-rounded" 
+                                    class="w-5 h-5 text-30 group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all duration-300" 
+                                />
+                            </div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+            
+            <!-- 空状态 -->
+            {sortedCategories.length === 0 && (
+                <div class="text-center py-16">
+                    <div class="w-16 h-16 rounded-full bg-[var(--btn-card-bg-hover)] flex items-center justify-center mx-auto mb-4">
+                        <Icon name="material-symbols:folder-off-outline-rounded" class="w-8 h-8 text-50" />
+                    </div>
+                    <p class="text-50 text-lg">暂无分类</p>
+                </div>
+            )}
+
+            <!-- 底部间距 -->
+            <div class="h-8"></div>
+        </div>
+    </div>
+</MainGridLayout>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

@@ -1,0 +1,174 @@
+---
+import { getCollection } from "astro:content";
+// 更新公告弹窗组件
+import { Icon } from "astro-icon/components";
+
+// 获取更新公告
+let noticeTitle = "网站更新公告";
+let noticeDate = "2026-02-28";
+let noticeBody =
+	"🎉 网站功能更新\n\n- 新增自定义右键菜单功能\n- 优化文章加密 UI 设计\n- 添加分类和标签页面\n- 改进说说界面瀑布流布局";
+
+try {
+	const notices = await getCollection("notice");
+	if (notices && notices.length > 0) {
+		const sortedNotices = notices.sort((a, b) => {
+			const dateA = new Date(a.data.date || 0);
+			const dateB = new Date(b.data.date || 0);
+			return dateB.getTime() - dateA.getTime();
+		});
+
+		if (sortedNotices.length > 0) {
+			const latest = sortedNotices[0];
+			noticeTitle = latest.data.title || noticeTitle;
+			noticeDate = latest.data.date || noticeDate;
+			noticeBody = latest.body || noticeBody;
+		}
+	}
+} catch (e) {
+	console.log("Using default notice content");
+}
+
+const noticeId = `notice-${noticeDate}-${noticeTitle}`;
+
+// Markdown 转 HTML
+function markdownToHtml(md: string): string {
+	if (!md) return "";
+	const lines = md.split("\n");
+	let result: string[] = [];
+	let inList = false;
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+			if (!inList) {
+				result.push('<ul class="list-disc pl-4 space-y-1 my-2">');
+				inList = true;
+			}
+			result.push(`<li class="text-sm">${trimmed.substring(2)}</li>`);
+		} else if (trimmed === "") {
+			if (inList) {
+				result.push("</ul>");
+				inList = false;
+			}
+		} else {
+			if (inList) {
+				result.push("</ul>");
+				inList = false;
+			}
+			result.push(`<p class="text-sm mb-1">${trimmed}</p>`);
+		}
+	}
+
+	if (inList) {
+		result.push("</ul>");
+	}
+
+	return result.join("");
+}
+
+const noticeHtml = markdownToHtml(noticeBody);
+---
+
+<div 
+  id="update-notice" 
+  class="fixed top-4 right-4 z-[10001] transform translate-x-full opacity-0 transition-all duration-500 ease-out max-w-[400px] w-[90vw]"
+  data-notice-id={noticeId}
+>
+  <div class="bg-[var(--card-bg)] border border-[var(--line-divider)] rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--line-divider)] bg-gradient-to-r from-[var(--primary)]/5 to-transparent">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center">
+          <Icon name="material-symbols:campaign-rounded" class="w-5 h-5 text-[var(--primary)]" />
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-90">{noticeTitle}</h3>
+          <p class="text-xs text-50">{noticeDate}</p>
+        </div>
+      </div>
+      <button 
+        onclick="closeUpdateNotice()" 
+        class="p-2 rounded-lg hover:bg-[var(--btn-card-bg-hover)] transition-colors text-50 hover:text-75"
+      >
+        <Icon name="material-symbols:close-rounded" class="w-5 h-5" />
+      </button>
+    </div>
+    
+    <div class="px-5 py-4">
+      <div class="text-75" set:html={noticeHtml} />
+    </div>
+    
+    <div class="h-1 bg-[var(--btn-card-bg-hover)]">
+      <div 
+        id="notice-progress" 
+        class="h-full bg-[var(--primary)] transition-all duration-[10000ms] ease-linear w-full"
+      ></div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ noticeId }}>
+  (function() {
+    const notice = document.getElementById('update-notice');
+    const progress = document.getElementById('notice-progress');
+    const STORAGE_KEY = 'last-shown-notice-id';
+    
+    function shouldShowNotice() {
+      const currentId = notice?.dataset.noticeId;
+      if (!currentId) return false;
+      const lastShownId = localStorage.getItem(STORAGE_KEY);
+      return lastShownId !== currentId;
+    }
+    
+    function showNotice() {
+      if (!notice) return;
+      
+      const currentId = notice.dataset.noticeId;
+      if (currentId) {
+        localStorage.setItem(STORAGE_KEY, currentId);
+      }
+      
+      notice.classList.remove('translate-x-full', 'opacity-0');
+      notice.classList.add('translate-x-0', 'opacity-100');
+      
+      if (progress) {
+        setTimeout(() => {
+          progress.style.width = '0%';
+        }, 50);
+      }
+      
+      setTimeout(() => {
+        closeUpdateNotice();
+      }, 10000);
+    }
+    
+    window.closeUpdateNotice = function() {
+      if (!notice) return;
+      notice.classList.add('translate-x-full', 'opacity-0');
+      notice.classList.remove('translate-x-0', 'opacity-100');
+    };
+    
+    window.showUpdateNotice = function() {
+      localStorage.removeItem(STORAGE_KEY);
+      showNotice();
+    };
+    
+    function init() {
+      if (shouldShowNotice()) {
+        setTimeout(showNotice, 1000);
+      }
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+<style>
+  #update-notice {
+    will-change: transform, opacity;
+  }
+</style>
