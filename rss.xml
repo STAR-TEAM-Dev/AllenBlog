@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/rss-style.xsl" type="text/xsl"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Allen2030&apos;s Blog</title><description> 非淡泊无以明志，非宁静无以致远</description><link>https://blog.fis.ink/</link><language>zh_CN</language><item><title>加密文件</title><link>https://blog.fis.ink/posts/%E5%88%86%E4%BA%AB/</link><guid isPermaLink="true">https://blog.fis.ink/posts/%E5%88%86%E4%BA%AB/</guid><pubDate>Fri, 27 Feb 2026 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;翡翠藏香，年味入蒜——腊八蒜的烟火故事&lt;/h1&gt;
+&lt;p&gt;腊八蒜是北方腊月里独有的烟火味道，更是刻在国人记忆里的年俗符号，南方亦称之为“翡翠蒜”。它并非只能在腊月初八腌制，却因这一节点的仪式感得名，承载着驱邪祈福、期盼团圆的美好寓意，也是北方人过年餐桌上不可或缺的佐餐佳品，搭配饺子、凉菜皆可，一口解锁冬日里的酸甜脆爽[1]。&lt;/p&gt;
+&lt;p&gt;腊八蒜的色泽堪称点睛之笔，是其最直观的特色。新鲜蒜瓣本是乳白或淡黄色，经米醋浸润发酵后，会逐渐褪去本色，慢慢染上浅绿、深绿，最终变成通体碧绿、晶莹剔透的模样，宛如一颗颗翡翠，在光线下泛着温润光泽[3]。这抹翠绿并非人工染色，而是蒜中物质在酸性环境和低温下发生化学反应的成果，也是腊八蒜发酵成功的标志[3]。&lt;/p&gt;
+&lt;p&gt;味道上，腊八蒜完美中和了生蒜的辛辣刺激，形成了独有的风味。入口先是米醋的清爽微酸，紧接着是蒜瓣的脆嫩回甘，辛辣感变得柔和绵长，酸、甜、辣、脆四味交织，香气浓郁却不刺鼻[2]。腌制后的蒜香与醋香深度融合，既能解腻开胃，又能增添风味，尤其是搭配油腻的肉食或鲜香的饺子时，一口下去，味蕾瞬间被唤醒[4]。&lt;/p&gt;
+&lt;p&gt;家常做法简单易操作，新手也能零失败。准备新鲜紫皮蒜500克、酿造米醋300毫升、冰糖30克，以及无油无水的玻璃密封罐[3]。先将蒜瓣剥去外层干皮，保留内层薄衣，剪去蒜蒂，晾干表面水分；再将蒜瓣装入玻璃罐，放入冰糖，倒入米醋，确保醋液完全没过蒜瓣；最后密封罐口，置于阴凉通风处，5-20天即可食用，温度越低，发酵时间越长，风味越浓郁[4]。&lt;/p&gt;
+&lt;p&gt;一坛腊八蒜，泡的是时光，藏的是年味。它不仅是一道简单的佐餐小菜，更承载着古人的生活智慧与民俗情怀，用最朴素的食材，经过时光的发酵，酿成最动人的烟火滋味，陪伴我们度过寒冬，迎接新春的到来。&lt;/p&gt;
+</content:encoded></item><item><title>给你的Fuwari加一个AI摘要</title><link>https://blog.fis.ink/posts/35/</link><guid isPermaLink="true">https://blog.fis.ink/posts/35/</guid><description>这篇文章介绍了如何在Fuwari博客中实现自定义AI摘要功能</description><pubDate>Mon, 08 Sep 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;预览：本文字上方&lt;/h1&gt;
+&lt;h1&gt;现在教程开始！&lt;/h1&gt;
+&lt;p&gt;:::caution
+修改文件前请注意备份，防止修改失败无法回退
+:::&lt;/p&gt;
+&lt;p&gt;新建src/components/misc/AISummary.astro文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;---
+export interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+
+// 如果没有内容，不渲染组件
+if (!content || content.trim() === &apos;&apos;) {
+  return null;
+}
+---
+
+{content &amp;amp;&amp;amp; (
+  &amp;lt;div class=&quot;ai-summary&quot;&amp;gt;
+    &amp;lt;div class=&quot;ai-title&quot;&amp;gt;
+      &amp;lt;div class=&quot;ai-title-left&quot;&amp;gt;
+        &amp;lt;i&amp;gt;🤖&amp;lt;/i&amp;gt;
+        &amp;lt;span class=&quot;ai-title-text&quot;&amp;gt;AI 摘要&amp;lt;/span&amp;gt;
+      &amp;lt;/div&amp;gt;
+      &amp;lt;div class=&quot;ai-tag&quot;&amp;gt;fishcpy AI&amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;div class=&quot;ai-explanation&quot; data-content={content}&amp;gt;&amp;lt;/div&amp;gt;
+  &amp;lt;/div&amp;gt;
+)}
+
+&amp;lt;script&amp;gt;
+  // 检查当前页面路径是否包含 &quot;posts&quot;
+  function isPostsPage() {
+    return window.location.pathname.includes(&apos;/posts/&apos;);
+  }
+
+  // 全局函数，用于初始化AI打字效果
+  function initAITyping() {
+    // 只在包含 &quot;posts&quot; 的页面才执行AI总结功能
+    if (!isPostsPage()) {
+      return;
+    }
+
+    // 查找所有AI摘要容器
+    const aiSummaryContainers = document.querySelectorAll(&apos;.ai-summary&apos;);
+    
+    aiSummaryContainers.forEach(container =&amp;gt; {
+      const textElement = container.querySelector(&apos;.ai-explanation&apos;);
+      
+      if (!textElement) {
+        return;
+      }
+
+      // 检查是否已经初始化过
+      if (textElement.hasAttribute(&apos;data-initialized&apos;)) {
+        return;
+      }
+
+      const content = textElement.getAttribute(&apos;data-content&apos;);
+      if (!content) {
+        return;
+      }
+
+      // 标记为已初始化
+      textElement.setAttribute(&apos;data-initialized&apos;, &apos;true&apos;);
+      
+      // 清空文本内容，准备打字效果
+      textElement.textContent = &apos;&apos;;
+      textElement.classList.remove(&apos;typing-complete&apos;);
+      
+      let index = 0;
+      const typeSpeed = 30; // 打字速度（毫秒）
+      
+      function typeWriter() {
+        if (index &amp;lt; content.length) {
+          textElement.textContent += content.charAt(index);
+          index++;
+          setTimeout(typeWriter, typeSpeed);
+        } else {
+          // 打字完成后隐藏光标（通过CSS控制）
+          textElement.classList.add(&apos;typing-complete&apos;);
+        }
+      }
+      
+      // 延迟开始打字效果
+      setTimeout(typeWriter, 800);
+    });
+  }
+
+  // 页面加载完成时初始化
+  function handlePageLoad() {
+    setTimeout(initAITyping, 100);
+  }
+
+  // 监听页面导航事件（适用于Astro的客户端路由）
+  function setupNavigationListeners() {
+    // DOMContentLoaded事件
+    if (document.readyState === &apos;loading&apos;) {
+      document.addEventListener(&apos;DOMContentLoaded&apos;, handlePageLoad);
+    } else {
+      handlePageLoad();
+    }
+
+    // 监听Astro的页面导航事件
+    document.addEventListener(&apos;astro:page-load&apos;, handlePageLoad);
+    
+    // 监听浏览器的popstate事件（后退/前进按钮）
+    window.addEventListener(&apos;popstate&apos;, handlePageLoad);
+    
+    // 监听pushstate和replacestate事件
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function() {
+      originalPushState.apply(history, arguments);
+      setTimeout(handlePageLoad, 100);
+    };
+    
+    history.replaceState = function() {
+      originalReplaceState.apply(history, arguments);
+      setTimeout(handlePageLoad, 100);
+    };
+  }
+
+  // 立即设置监听器
+  setupNavigationListeners();
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在src/content/config.ts插入下方代码，13行下左右，注意+号要删除&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;tags: z.array(z.string()).optional().default([]),
+category: z.string().optional().nullable().default(&quot;&quot;),
+lang: z.string().optional().default(&quot;&quot;),
++		ai: z.string().optional().default(&quot;&quot;),
+
+/* For internal use */
+prevTitle: z.string().default(&quot;&quot;),
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在src/pages/posts/[...slug].astro插入下方代码，注意+号要删除&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import { profileConfig, siteConfig } from &quot;../../config&quot;;
+import { formatDateToYYYYMMDD } from &quot;../../utils/date-utils&quot;;
+import Comment from &quot;@components/comment/index.astro&quot;;
++ import AISummary from &quot;@components/misc/AISummary.astro&quot;;
+
+export async function getStaticPaths() {
+	const blogEntries = await getSortedPosts();
+@@ -84,6 +85,9 @@ const jsonLd = {
+&amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+
++            &amp;lt;!-- AI Summary --&amp;gt;
++            {entry.data.description &amp;amp;&amp;amp; &amp;lt;AISummary content={entry.data.description} class=&quot;onload-animation&quot; /&amp;gt;}
+
+&amp;lt;!-- metadata --&amp;gt;
+&amp;lt;div class=&quot;onload-animation&quot;&amp;gt;
+&amp;lt;PostMetadata
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在src/styles/main.css底部添加下方代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/* =================== */
+/* 📘 AI 摘要模块样式 */
+/* =================== */
+
+.ai-summary {
+    background: var(--card-bg);
+    border: 1px solid var(--line-divider);
+    border-radius: 12px;
+    padding: 8px 8px 12px 8px;
+    line-height: 1.3;
+    flex-direction: column;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 5px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.ai-summary:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.ai-summary .ai-explanation {
+    z-index: 10;
+    padding: 8px 12px;
+    font-size: 15px;
+    line-height: 1.4;
+    @apply text-90;
+    text-align: justify;
+}
+
+/* ✅ 打字机光标动画 */
+.ai-summary .ai-explanation::after {
+    content: &apos;&apos;;
+    display: inline-block;
+    width: 8px;
+    height: 2px;
+    margin-left: 2px;
+    @apply bg-black/90 dark:bg-white/90;
+    vertical-align: bottom;
+    animation: blink-underline 1s ease-in-out infinite;
+    transition: all 0.3s;
+    position: relative;
+    bottom: 3px;
+}
+
+/* 打字完成后隐藏光标 */
+.ai-summary .ai-explanation.typing-complete::after {
+    display: none;
+}
+
+.ai-summary .ai-title {
+    z-index: 10;
+    font-size: 14px;
+    display: flex;
+    border-radius: 8px;
+    align-items: center;
+    position: relative;
+    padding: 0 12px;
+    cursor: default;
+    user-select: none;
+}
+
+.ai-summary .ai-title .ai-title-left {
+    display: flex;
+    align-items: center;
+    color: var(--primary);
+}
+
+.ai-summary .ai-title .ai-title-left i {
+    margin-right: 3px;
+    display: flex;
+    color: var(--primary);
+    border-radius: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.ai-summary .ai-title .ai-title-left .ai-title-text {
+    font-weight: 500;
+}
+
+.ai-summary .ai-title .ai-tag {
+    color: var(--btn-content);
+    font-weight: 300;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+/* ✅ 打字机光标闪烁动画 */
+@keyframes blink-underline {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;最后在src/styles/variables.styl 大约19行后面添加下方代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  --page-bg: oklch(0.95 0.01 var(--hue)) oklch(0.16 0.014 var(--hue))
+  --card-bg: white oklch(0.23 0.015 var(--hue))
+
++  // AI Summary 相关变量
++  --liushen-title-font-color: #0883b7 #0883b7
++  --liushen-maskbg: rgba(255, 255, 255, 0.85) rgba(0, 0, 0, 0.85)
++  --liushen-ai-bg: conic-gradient(from 1.5708rad at 50% 50%, #d6b300 0%, #42A2FF 54%, #d6b300 100%) conic-gradient(from 1.5708rad at 50% 50%, rgba(214, 178, 0, 0.46) 0%, rgba(66, 161, 255, 0.53) 54%, rgba(214, 178, 0, 0.49) 100%)
++  --liushen-card-secondbg: #f1f3f8 #3e3f41
++  --liushen-text: #4c4948 #ffffffb3
++  --liushen-secondtext: #3c3c43cc #a1a2b8
+
+  --btn-content: oklch(0.55 0.12 var(--hue)) oklch(0.75 0.1 var(--hue))
+  --btn-regular-bg: oklch(0.95 0.025 var(--hue)) oklch(0.33 0.035 var(--hue))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1&gt;样式参考&lt;/h1&gt;
+&lt;p&gt;::link-card{url=&quot;https://blog.liushen.fun/posts/40702a0d/&quot; title=&quot;清羽飞扬&quot; description=&quot;本地实现HEXO文章AI摘要&quot; icon=&quot;https://blog.liushen.fun/info/avatar.ico&quot;}&lt;/p&gt;
+</content:encoded></item><item><title>trae AI 编辑器SOLO模式貌似会注入广告</title><link>https://blog.fis.ink/posts/32/</link><guid isPermaLink="true">https://blog.fis.ink/posts/32/</guid><description>trae AI 编辑器SOLO模式默认提示词貌似会注入广告</description><pubDate>Mon, 18 Aug 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;事件经过&lt;/h1&gt;
+&lt;p&gt;我在2025.8.17日下午使用trae的SOLO模式并使用SOLO Builder智能体开发vue3的&amp;lt;a href=&quot;https://github.com/fishcpy/homepage&quot; target=&quot;_blank&quot;&amp;gt;个人主页&amp;lt;/a&amp;gt;，模型使用的是Claude 4。&amp;lt;br/&amp;gt;
+起初在预览环境没有问题，但是我将整个项目上传到github并部署到vercel时右下角却出现SOLO模式的广告组件。&amp;lt;br/&amp;gt;
+&lt;img src=&quot;https://cdn.fis.ink/cdn/2025/08/24/68aaa04bd2296.webp&quot; alt=&quot;1756012616606.webp&quot; /&gt;&amp;lt;br/&amp;gt;
+经过翻代码发现AI在写vite.config.ts时引入了trae的广告组件。&amp;lt;br/&amp;gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import traeBadgePlugin from &apos;vite-plugin-trae-solo-badge&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;    traeBadgePlugin({
+      variant: &apos;dark&apos;,
+      position: &apos;bottom-right&apos;,
+      prodOnly: true,
+      clickable: true,
+      clickUrl: &apos;https://www.trae.ai/solo?showJoin=1&apos;,
+      autoTheme: true,
+      autoThemeTarget: &apos;#app&apos;,
+    }),
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这显然是提示词注入。&amp;lt;br/&amp;gt;&lt;/p&gt;
+&lt;h1&gt;如何解决&lt;/h1&gt;
+&lt;h2&gt;如果你有编程基础&lt;/h2&gt;
+&lt;p&gt;可以直接翻代码移除。&lt;/p&gt;
+&lt;h2&gt;如果你没有编程基础&lt;/h2&gt;
+&lt;p&gt;先切换到IDE模式，浏览器在生产环境的网页按F12选择广告组件，复制HTML。&amp;lt;br/&amp;gt;
+随便选择一个模型，跟它说删除+复制的html，等待自动删除即可。&lt;/p&gt;
+</content:encoded></item><item><title>给你的Fuwari加一个链接大卡片</title><link>https://blog.fis.ink/posts/30/</link><guid isPermaLink="true">https://blog.fis.ink/posts/30/</guid><description>注意:本文章修改文件部分为AI所写。这篇文章介绍了如何在Astro博客中实现自定义之类的第三方链接卡片功能。文章分为示例和添加教程两部分。</description><pubDate>Sat, 16 Aug 2025 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;h1&gt;25.8.26更新&lt;/h1&gt;
+&lt;h3&gt;更改了部分UI&lt;/h3&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;:::tip
+由于我没有实力，本篇文章修改文件部分为AI所写
+:::&lt;/p&gt;
+&lt;p&gt;:::caution
+修改文件前请注意备份，防止修改失败无法回退
+:::&lt;/p&gt;
+&lt;h1&gt;前言&lt;/h1&gt;
+&lt;p&gt;今天在看liushen大佬文章时看到了个大卡片效果，感觉挺好看的，于是让AI给我加上了&lt;/p&gt;
+&lt;p&gt;::link-card{url=&quot;https://blog.liushen.fun/posts/aae6fd55/&quot; title=&quot;清羽飞扬&quot; description=&quot;循一缕风，入山偷得夏日凉&quot; icon=&quot;https://blog.liushen.fun/info/avatar.ico&quot;}&lt;/p&gt;
+&lt;h1&gt;示例&lt;/h1&gt;
+&lt;h2&gt;自定义标题和描述&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot;}&lt;/p&gt;
+&lt;h2&gt;带图片的链接卡片&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; icon=&quot;https://github.com/github.png&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; image=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot;}&lt;/p&gt;
+&lt;h2&gt;自定义图标的链接卡片&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; icon=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; icon=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot;}&lt;/p&gt;
+&lt;h2&gt;最终效果&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; icon=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot; image=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;::link-card{url=&quot;https://www.fis.ink&quot; title=&quot;fishcpy的主页&quot; description=&quot;fishcpy的个人主页&quot; icon=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot; image=&quot;https://file.fis.ink/img/fishcpy/logo.png&quot;}&lt;/p&gt;
+&lt;h1&gt;添加教程&lt;/h1&gt;
+&lt;h2&gt;再次提示&lt;/h2&gt;
+&lt;p&gt;:::tip
+由于我没有实力，下方内容为AI所写
+:::&lt;/p&gt;
+&lt;p&gt;:::caution
+修改文件前请注意备份，防止修改失败无法回退
+:::&lt;/p&gt;
+&lt;h3&gt;1. 创建组件文件&lt;/h3&gt;
+&lt;p&gt;首先，在 &lt;code&gt;src/plugins/&lt;/code&gt; 目录下创建 &lt;code&gt;rehype-component-link-card.mjs&lt;/code&gt; 文件：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/// &amp;lt;reference types=&quot;mdast&quot; /&amp;gt;
+import { h } from &quot;hastscript&quot;;
+
+/**
+ * Creates a Link Card component for third-party links.
+ */
+export function LinkCardComponent(properties, children) {
+	if (Array.isArray(children) &amp;amp;&amp;amp; children.length !== 0)
+		return h(&quot;div&quot;, { class: &quot;hidden&quot; }, [
+			&apos;Invalid directive. (&quot;link-card&quot; directive must be leaf type &quot;::link-card{url=&quot;https://example.com&quot;}&quot;))&apos;,
+		]);
+
+	if (!properties.url || !properties.url.startsWith(&apos;http&apos;))
+		return h(
+			&quot;div&quot;,
+			{ class: &quot;hidden&quot; },
+			&apos;Invalid URL. (&quot;url&quot; attribute must be a valid HTTP/HTTPS URL)&apos;,
+		);
+
+	const url = properties.url;
+	const customTitle = properties.title;
+	const customDescription = properties.description;
+	const customImage = properties.image;
+	const customIcon = properties.icon;
+	const cardUuid = `LC${Math.random().toString(36).slice(-6)}`;
+
+	// Extract domain from URL for display
+	const domain = new URL(url).hostname;
+
+	// Use custom icon if provided, otherwise use Google favicon service
+	const iconUrl = customIcon || `https://www.google.com/s2/favicons?domain=${domain}&amp;amp;sz=32`;
+	const nFavicon = h(`div#${cardUuid}-favicon`, { 
+		class: &quot;lc-favicon&quot;,
+		style: `background-image: url(${iconUrl})` 
+	});
+
+	// 隐藏域名显示的标题栏
+	const nTitle = h(&quot;div&quot;, { class: &quot;lc-titlebar&quot; }, [
+		h(&quot;div&quot;, { class: &quot;lc-titlebar-left&quot; }, [
+			// h(&quot;div&quot;, { class: &quot;lc-site&quot; }, domain), // 已注释掉域名显示
+		]),
+		h(&quot;div&quot;, { class: &quot;lc-external-icon&quot; }),
+	]);
+
+	const nCardTitle = h(
+		`div#${cardUuid}-title`,
+		{ class: &quot;lc-card-title&quot; },
+		customTitle || &quot;Link&quot;,
+	);
+
+	const nDescription = h(
+		`div#${cardUuid}-description`,
+		{ class: &quot;lc-description&quot; },
+		customDescription || &quot;Click to visit&quot;,
+	);
+
+	const nImage = h(
+		`div#${cardUuid}-image`,
+		{ class: &quot;lc-image&quot; },
+		customImage ? h(&quot;img&quot;, { src: customImage, alt: &quot;Link preview&quot; }) : null
+	);
+
+	// Only fetch metadata if custom data is not provided
+	const needsFetch = !customTitle || !customDescription;
+	
+	const nScript = needsFetch ? h(
+		`script#${cardUuid}-script`,
+		{ type: &quot;text/javascript&quot;, defer: true },
+		`
+			// Simple metadata extraction for link cards
+			try {
+				const cardElement = document.getElementById(&apos;${cardUuid}-card&apos;);
+				const titleElement = document.getElementById(&apos;${cardUuid}-title&apos;);
+				const descElement = document.getElementById(&apos;${cardUuid}-description&apos;);
+				
+				// Set default values if custom ones weren&apos;t provided
+				if (!titleElement.dataset.hasCustomTitle) {
+					titleElement.innerText = &apos;Link&apos;;
+				}
+				if (!descElement.dataset.hasCustomDesc) {
+					descElement.innerText = &apos;Click to visit&apos;;
+				}
+				
+				cardElement.classList.remove(&quot;fetch-waiting&quot;);
+				console.log(&quot;[LINK-CARD] Loaded card for ${url} | ${cardUuid}.&quot;);
+			} catch (err) {
+				const c = document.getElementById(&apos;${cardUuid}-card&apos;);
+				c?.classList.add(&quot;fetch-error&quot;);
+				console.warn(&quot;[LINK-CARD] (Error) Loading card for ${url} | ${cardUuid}.&quot;);
+			}
+		`,
+	) : null;
+
+	// Set data attributes for custom content
+	if (customTitle) {
+		nCardTitle.properties[&apos;data-has-custom-title&apos;] = &apos;true&apos;;
+	}
+	if (customDescription) {
+		nDescription.properties[&apos;data-has-custom-desc&apos;] = &apos;true&apos;;
+	}
+
+	const cardContent = [
+		nTitle,
+		nCardTitle,
+		nDescription,
+	];
+
+	if (customImage) {
+		cardContent.push(nImage);
+	}
+
+	if (nScript) {
+		cardContent.push(nScript);
+	}
+
+	return h(
+		`a#${cardUuid}-card`,
+		{
+			class: needsFetch ? &quot;card-link fetch-waiting no-styling&quot; : &quot;card-link no-styling&quot;,
+			href: url,
+			target: &quot;_blank&quot;,
+			rel: &quot;noopener noreferrer&quot;,
+			&apos;data-url&apos;: url,
+		},
+		cardContent,
+	);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2. 添加CSS样式&lt;/h3&gt;
+&lt;p&gt;在 &lt;code&gt;src/styles/markdown-extend.styl&lt;/code&gt; 文件中添加以下样式：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// Link Card Styles
+a.card-link
+  display: block
+  text-decoration: none
+  border: 1px solid var(--line-divider)
+  border-radius: 8px
+  padding: 16px
+  margin: 16px 0
+  background-color: var(--card-bg)
+  transition: all 0.2s ease
+  position: relative
+  overflow: hidden
+  color: inherit
+
+  &amp;amp;:hover
+    background-color: var(--btn-regular-bg-hover)
+
+    .lc-titlebar
+      .lc-external-icon
+        opacity: 1
+
+  &amp;amp;:active
+    transform: translateY(0)
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1)
+
+  // 隐藏标题栏以移除域名显示和空白区域
+  .lc-titlebar
+    display: none
+
+    .lc-titlebar-left
+      display: flex
+      align-items: center
+
+    .lc-site
+      display: flex
+      align-items: center
+      gap: 8px
+
+    .lc-favicon
+      width: 16px
+      height: 16px
+      background-size: contain
+      background-repeat: no-repeat
+      background-position: center
+      flex-shrink: 0
+
+    .lc-domain
+      font-size: 14px
+      color: var(--text-color-secondary)
+      font-weight: 500
+
+    .lc-external-icon
+      width: 16px
+      height: 16px
+      opacity: 0.6
+      transition: opacity 0.2s ease
+      background-image: url(&apos;data:image/svg+xml;utf8,&amp;lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&amp;gt;&amp;lt;path d=&quot;M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6&quot;&amp;gt;&amp;lt;/path&amp;gt;&amp;lt;polyline points=&quot;15,3 21,3 21,9&quot;&amp;gt;&amp;lt;/polyline&amp;gt;&amp;lt;line x1=&quot;10&quot; y1=&quot;14&quot; x2=&quot;21&quot; y2=&quot;3&quot;&amp;gt;&amp;lt;/line&amp;gt;&amp;lt;/svg&amp;gt;&apos;)
+      background-size: contain
+      background-repeat: no-repeat
+      background-position: center
+
+  .lc-card-title
+    font-size: 18px
+    font-weight: 600
+    color: var(--text-color-primary)
+    margin-bottom: 8px
+    line-height: 1.3
+
+  .lc-description
+    font-size: 14px
+    color: var(--text-color-secondary)
+    line-height: 1.4
+    margin-bottom: 12px
+
+  // 移除图片上方的空白区域
+  .lc-image
+    margin-top: 0
+    
+    img
+      width: 100%
+      max-height: 200px
+      object-fit: cover
+      border-radius: 4px
+
+  &amp;amp;.fetch-waiting
+    .lc-card-title, .lc-description
+      animation: pulse 1.5s ease-in-out infinite
+
+  &amp;amp;.fetch-error
+    border-color: var(--error-color)
+    background-color: var(--error-bg)
+
+@keyframes pulse
+  0%, 100%
+    opacity: 1
+  50%
+    opacity: 0.5
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;3. 配置Astro&lt;/h3&gt;
+&lt;p&gt;在 &lt;code&gt;astro.config.mjs&lt;/code&gt; 文件中导入组件并注册：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// 添加导入
+import { LinkCardComponent } from &quot;./src/plugins/rehype-component-link-card.mjs&quot;;
+
+// 在 rehypeComponents 配置中添加
+rehypeComponents,
+{
+  components: {
+    github: GithubCardComponent,
+    &quot;link-card&quot;: LinkCardComponent, // 添加这一行
+    note: (x, y) =&amp;gt; AdmonitionComponent(x, y, &quot;note&quot;),
+    // ... 其他组件
+  },
+},
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;4. 使用方法&lt;/h3&gt;
+&lt;p&gt;配置完成后，你就可以在Markdown文件中使用链接卡片了：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// 基本用法
+::link-card{url=&quot;https://example.com&quot;}
+
+// 自定义标题和描述
+::link-card{url=&quot;https://github.com&quot; title=&quot;GitHub&quot; description=&quot;代码托管平台&quot;}
+
+// 带自定义图片
+::link-card{url=&quot;https://vercel.com&quot; title=&quot;Vercel&quot; description=&quot;部署平台&quot; image=&quot;https://example.com/image.png&quot;}
+
+// 自定义图标
+::link-card{url=&quot;https://github.com&quot; title=&quot;GitHub&quot; description=&quot;代码托管平台&quot; icon=&quot;https://github.com/favicon.ico&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;5. 注意事项&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;确保URL以 &lt;code&gt;http://&lt;/code&gt; 或 &lt;code&gt;https://&lt;/code&gt; 开头&lt;/li&gt;
+&lt;li&gt;自定义图片建议使用合适的尺寸和格式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;现在你的博客就拥有了美观的第三方链接大卡片功能！&lt;/p&gt;
+</content:encoded></item><item><title>Uptime Kuma监控美化</title><link>https://blog.fis.ink/posts/29/</link><guid isPermaLink="true">https://blog.fis.ink/posts/29/</guid><description>这是一个关于部署和美化Uptime Kuma监控面板的分享，内容总结如下：首先介绍了Uptime Kuma的部署，可以通过Docker等平台部署，具体细节见官方GitHub仓库。接着提供了一份自定义CSS，用于美化界面，特点包括浅色和暗色模式切换、自定义颜色变量、背景固定图片、卡片半透明和模糊效果、按钮带玻璃质感、状态指示点和百分比徽章的呼吸动画、响应式移动端布局、隐藏更新时间信息，以及柔和的文字边框阴影等视觉优化。最后给出了示例监控站点链接https://status.fishcpy.top/status/web，适合喜欢暗色模式和现代玻璃拟态风格的用户，方便直接套用或二次修改。</description><pubDate>Sat, 09 Aug 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;部署Uptime Kuma&lt;/h1&gt;
+&lt;p&gt;首先需要部署&lt;a href=&quot;https://github.com/louislam/uptime-kuma&quot;&gt;Uptime Kuma&lt;/a&gt;，可以在docker等平台部署，这里不多说，自己看看github仓库&lt;/p&gt;
+&lt;h1&gt;美化&lt;/h1&gt;
+&lt;p&gt;我这里提供一个css，可以参考一下，我也是用别人css加了一点效果&lt;/p&gt;
+&lt;p&gt;具体效果可以看我的&lt;a href=&quot;https://status.fishcpy.top/status/web&quot;&gt;监控站&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;:root {
+  --bs-white: #fff;
+  --bs-dark: #212529;
+  --bs-green: #008000;
+  --bs-danger: #dc3545;
+  --bs-body-bg: #f6f7f9;
+  --bs-blue: #0d6efd;
+  --bg-linear-gradient: linear-gradient(180deg, #f6f6f6, #f8f8f8);
+  --border-solid-main: 2px solid var(--bs-white);
+  --border-solid-small: 1px solid var(--bs-white);
+  --shadow-inset-box: inset -4px -4px 12px #f1f1f1, inset 4px 4px 12px #e2e2e2;
+}
+
+.dark {
+  --bs-white: #2d2d2d;
+  --bs-dark: #e9ecef;
+  --bs-green: #00c800;
+  --bs-danger: #dc3545;
+  --bs-body-bg: #222222;
+  --bg-linear-gradient: linear-gradient(180deg, #242424, #222222);
+  --border-solid-main: 2px solid rgba(45, 45, 45, 0.8);
+  --border-solid-small: 1px solid rgba(45, 45, 45, 0.6);
+  --shadow-inset-box: inset -4px -4px 12px #0d0d0d, inset 4px 4px 12px #1a1a1a;
+}
+
+body {
+  background-color: var(--bs-body-bg) !important;
+}
+
+/* 全局样式 */
+body {
+  font-family: &apos;CustomFont&apos;, sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background-image: url(&apos;https://api.fis.ink/mc&apos;);
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* LOGO标题样式 */
+.title-flex {
+  font-weight: bold;
+  justify-content: center;
+}
+
+/* 按钮 */
+.btn-info {
+  color: var(--bs-dark);
+  background-image: var(--bg-linear-gradient);
+  border: var(--border-solid-main);
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: none !important;
+}
+
+.btn-info:hover {
+  color: var(--bs-dark);
+  background-color: transparent;
+  border-color: unset;
+  box-shadow: none !important;
+}
+
+/* 服务组标题 */
+.group-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  opacity: .5;
+  -webkit-mask: linear-gradient(var(--bs-white) 50%, transparent);
+  mask: linear-gradient(var(--bs-white) 50%, transparent);
+  text-stroke: 1px var(--bs-dark);
+  -webkit-text-stroke: 1px var(--bs-dark);
+  -webkit-text-fill-color: transparent;
+}
+
+/* 服务项目列表样式 */
+.monitor-list .monitor-list {
+  min-height: 45px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.monitor-list .item .info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.info1::before,
+.info1::after {
+  content: &quot;&quot;;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: var(--bs-white);
+  margin: 0.5rem 0;
+  border-radius: 50%;
+  animation: breath 1.5s ease-in-out infinite;
+}
+
+.info1::after {
+  animation-delay: 0.75s;
+}
+
+.info .bg-danger+.item-name {
+  color: var(--bs-red);
+}
+
+.shadow-box {
+  margin-top: 0 !important;
+  background-image: var(--bg-linear-gradient);
+  box-shadow: none !important;
+}
+
+div[data-v-f71ca08e].mb-5:hover .group-title {
+  -webkit-text-fill-color: var(--bs-dark);
+}
+
+.monitor-list .item {
+  box-shadow: none !important;
+}
+
+.monitor-list .item:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: none !important;
+}
+
+.dark .monitor-list .item:hover {
+  background-color: var(--bs-body-bg);
+  box-shadow: none !important;
+}
+
+/* 服务项目列表标题样式 */
+.item-name {
+  font-weight: bold;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+a.item-name:hover {
+  color: var(--bs-blue) !important;
+}
+
+.overall-status .ok {
+  color: var(--bs-green) !important;
+}
+
+.hp-bar-big .beat[data-v-636dc6a9] {
+  background-color: var(--bs-green);
+}
+
+.item .row {
+  justify-content: space-between;
+}
+
+.info .badge.rounded-pill.bg-primary {
+  --bg: var(--bs-green);
+}
+
+.info .badge.rounded-pill.bg-danger {
+  --bg: var(--bs-danger);
+}
+
+.info .badge.rounded-pill {
+  position: relative;
+  display: flex;
+  min-width: auto;
+  width: 1rem;
+  margin-left: 0.1rem;
+  font-size: 0;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent !important;
+}
+
+.info .badge.rounded-pill::before {
+  position: absolute;
+  content: &quot;&quot;;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: var(--bg);
+  animation: breath 1.1s ease-in-out infinite;
+}
+
+.info .badge.rounded-pill::after {
+  content: &quot;&quot;;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--bg);
+}
+
+@keyframes breath {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* 隐藏更新时间 */
+.refresh-info.mb-2 {
+  display: none;
+}
+
+/* 公共样式优化 */
+.col-md-4 {
+  width: 50%;
+}
+
+.col-md-8 {
+  max-width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.mb-5 {
+  margin-bottom: 2rem !important;
+}
+
+/* 底部样式 */
+footer[data-v-b8247e57] {
+  margin: 1.5rem 0 !important;
+}
+
+footer p {
+  margin: 0 !important;
+}
+
+/* 适配手机 */
+@media screen and (max-width: 768px) {
+  .monitor-list .monitor-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .group-title {
+    font-size: 2rem;
+  }
+}
+
+/* 全局半透明背景卡片 */
+.shadow-box,
+.monitor-list .item {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 暗色模式下卡片透明度调低 */
+.dark .shadow-box,
+.dark .monitor-list .item,
+.dark .btn-info {
+  background-color: rgba(34, 34, 34, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 标题透明度柔和 */
+.group-title {
+  opacity: 0.5;
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果你需要自定义背景可以把上方css中的第36行左右的 https://api.fis.ink/mc 换为自己的图片或图片api&lt;/p&gt;
+</content:encoded></item><item><title>给你的博客加上一个十年倒计时吧</title><link>https://blog.fis.ink/posts/21/</link><guid isPermaLink="true">https://blog.fis.ink/posts/21/</guid><description>本文详细介绍了如何在 hexo-theme-anzhiyu 主题博客中添加自定义倒计时功能。通过新建JavaScript文件和在Markdown文件中插入HTML代码，实现动态倒计时显示，且支持自定义目标时间和样式。</description><pubDate>Fri, 10 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;h2&gt;效果预览 &lt;a href=&quot;https://mengmengmao.cn/about/&quot;&gt;关于 fishcpy的小破站&lt;/a&gt;&lt;/h2&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;打开： 你博客目录/themes/anzhiyu/source/js&lt;/h1&gt;
+&lt;p&gt;在里面新建一个.js文件，例如我新建了一个clock.js文件 编辑文件，加入下面代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;// 设置倒计时的目标日期
+var countDownDate = new Date(&quot;September 6, 2034 00:00:00&quot;).getTime();
+
+// 每秒更新倒计时
+var x = setInterval(function() {
+    var now = new Date().getTime();
+    var distance = countDownDate - now;
+
+    // 计算天、小时、分钟和秒
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // 显示结果
+    document.getElementById(&quot;countdown&quot;).innerHTML = 
+        days + &quot;天 &quot; + hours + &quot;小时 &quot; + 
+        minutes + &quot;分钟 &quot; + seconds + &quot;秒 &quot;;
+
+    // 倒计时结束显示提示
+    if (distance &amp;lt; 0) {
+        clearInterval(x);
+        document.getElementById(&quot;countdown&quot;).innerHTML = &quot;你发现了彩蛋&quot;;
+    }
+}, 1000);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;参数&lt;/p&gt;
+&lt;p&gt;注释&lt;/p&gt;
+&lt;p&gt;可改值&lt;/p&gt;
+&lt;p&gt;你发现了彩蛋&lt;/p&gt;
+&lt;p&gt;倒计时结束的文字&lt;/p&gt;
+&lt;p&gt;随意&lt;/p&gt;
+&lt;p&gt;September 6&lt;/p&gt;
+&lt;p&gt;日期&lt;/p&gt;
+&lt;p&gt;英文月份+日期&lt;/p&gt;
+&lt;p&gt;2034 00:00:00&lt;/p&gt;
+&lt;p&gt;日期&lt;/p&gt;
+&lt;p&gt;年份+具体时间&lt;/p&gt;
+&lt;h1&gt;在你要的文件里(本人仅测试了md文件)加入下面代码即可实现&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;style&amp;gt;
+.big-font {
+    font-size: 50px;  /* 字体大小保持原样 */
+    font-weight: bold;
+}
+&amp;lt;/style&amp;gt;
+
+&amp;lt;body&amp;gt;
+    &amp;lt;!-- 倒计时容器 --&amp;gt;
+    &amp;lt;div id=&quot;countdown&quot; class=&quot;big-font&quot;&amp;gt;&amp;lt;/div&amp;gt;
+
+    &amp;lt;!-- 修正类名前多余的点号 --&amp;gt;
+    &amp;lt;script data-pjax defer src=&apos;/js/clock.js&apos;&amp;gt;&amp;lt;/script&amp;gt;
+    &amp;lt;div class=&quot;pjax-reload&quot;&amp;gt;&amp;lt;/div&amp;gt;  &amp;lt;!-- 修正后的类名 --&amp;gt;
+&amp;lt;/body&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;参数&lt;/p&gt;
+&lt;p&gt;注释&lt;/p&gt;
+&lt;p&gt;可改值&lt;/p&gt;
+&lt;p&gt;50px&lt;/p&gt;
+&lt;p&gt;大小&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://geek-docs.com/html/html-ask-answer/824_html_how_to_change_font_size_in_html.html&quot;&gt;可以看一下这个&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;/js/clock.js&lt;/p&gt;
+&lt;p&gt;文件位置&lt;/p&gt;
+&lt;p&gt;/js/文件名.js， 文件名为你刚创建的文件名&lt;/p&gt;
+</content:encoded></item><item><title>安知鱼主题音乐馆默认歌单修改</title><link>https://blog.fis.ink/posts/20/</link><guid isPermaLink="true">https://blog.fis.ink/posts/20/</guid><description>本文介绍了如何在 hexo-theme-anzhiyu 主题中，通过修改 utils.js 文件中的 getCustomPlayList 函数，自定义歌单ID及音乐服务商，实现简化访问音乐接口的配置方法。</description><pubDate>Sat, 14 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;仅适用于&lt;a href=&quot;https://github.com/anzhiyu-c/hexo-theme-anzhiyu&quot;&gt;hexo-theme-anzhiyu&lt;/a&gt;，其他请自行测试&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;文件路径&lt;/h2&gt;
+&lt;p&gt;打开博客根目录目录 依次打开 /themes/anzhiyu/source/js 里面有一个utils.js 打开它 按ctrl+f搜索 getCustomPlayList: function () &lt;img src=&quot;https://blogpng.fishcpy.top/mengmengmao/2024/12/14/675d0caa60c94.png&quot; alt=&quot;&quot; /&gt; 文件参数是这样的 修改const userId = 你歌单的id 如果想修改歌单音乐服务商就改const userServer = netease或tencent或kugou,或xiami或 baidu 这样访问 /music/接可以了，不用在后面加?id=歌单id&amp;amp;server=音乐服务商&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;参考 &lt;a href=&quot;https://blog.csdn.net/2202_75762088/article/details/138251572#:~:text=%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%B0%B1%E6%98%AFBloghemesanzhiyusourcejsutils.js%20%E6%89%93%E5%BC%80%E8%AF%A5%E6%96%87%E4%BB%B6%EF%BC%8C%E6%8C%89Ctrl%2BF%E6%90%9C%E7%B4%A2%20getCustomPlayList%3A,function%20%28%29%20%E8%BF%99%E4%B8%AA%E5%87%BD%E6%95%B0%E5%86%85%E5%B0%B1%E6%98%AF%E5%85%B3%E4%BA%8E%E9%9F%B3%E4%B9%90%E6%BA%90%E7%9A%84%E8%AE%BE%E7%BD%AE%EF%BC%8C%E6%94%B9%E6%88%90%E8%87%AA%E5%B7%B1%E7%9A%84%E5%B0%B1%E5%A5%BD%EF%BC%9A&quot;&gt;避坑：我找到了Hexo安知鱼的音乐馆配置(目前好像还没有教程)&lt;/a&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+</content:encoded></item><item><title>引入Aplayer播放音乐-自定义api地址</title><link>https://blog.fis.ink/posts/19/</link><guid isPermaLink="true">https://blog.fis.ink/posts/19/</guid><description>本文分享如何在 akilar糖果屋主题中自定义 Aplayer 的 meting_js API 地址，解决官方API不稳定、歌曲播放断续的问题，通过在注入的 Aplayer 容器中添加 `data-meting_api` 参数，实现调用自定义的音乐接口。</description><pubDate>Sat, 07 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;h2&gt;此文章仅适用于akilar糖果屋中的 &lt;strong&gt;引入Aplayer播放音乐&lt;/strong&gt; 文章 &lt;a href=&quot;https://akilar.top/posts/3afa069a/&quot;&gt;https://akilar.top/posts/3afa069a/&lt;/a&gt; ，其他请自行测试]&lt;/h2&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;1.为什么要自定义api地址&lt;/h1&gt;
+&lt;p&gt;meting_js的官方api很不稳定，播放歌曲断断续续，所以要自定义api地址&lt;/p&gt;
+&lt;h1&gt;2.如何自定义api地址&lt;/h1&gt;
+&lt;p&gt;akilar糖果屋中有这样一些字 4.在主题配置文件&lt;code&gt;[Blogroot]\_config.butterfly.yml&lt;/code&gt;的inject配置项中添加Aplayer的容器。&lt;/p&gt;
+&lt;p&gt;1
+2
+3
+4&lt;/p&gt;
+&lt;p&gt;inject:
+head:
+bottom:
+- &amp;lt;div class=&quot;aplayer no-destroy&quot; data-id=&quot;5183531430&quot; data-server=&quot;netease&quot; data-type=&quot;playlist&quot; data-fixed=&quot;true&quot; data-mini=&quot;true&quot; data-listFolded=&quot;false&quot; data-order=&quot;random&quot; data-preload=&quot;none&quot; data-autoplay=&quot;false&quot; muted&amp;gt;&amp;lt;/div&amp;gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Aplayer的网易云歌单接口时不时的会挂掉，所以如果你确定你配置正确，但是歌单还是没有出现。不妨去看看其他人的站点是不是也没有Aplayer标签了来判断是Aplayer本身接口的问题还是自己配置出错的问题。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;里面并没有说如何自定义api地址 所根据我的尝试，成功自定义api地址&lt;/p&gt;
+&lt;p&gt;1
+2
+3
+4
+5&lt;/p&gt;
+&lt;p&gt;# akilar糖果屋中原本代码
+- &amp;lt;div class=&quot;aplayer no-destroy&quot; data-id=&quot;5183531430&quot; data-server=&quot;netease&quot; data-type=&quot;playlist&quot; data-fixed=&quot;true&quot; data-mini=&quot;true&quot; data-listFolded=&quot;false&quot; data-order=&quot;random&quot; data-preload=&quot;none&quot; data-autoplay=&quot;false&quot; muted&amp;gt;&amp;lt;/div&amp;gt;&lt;/p&gt;
+&lt;p&gt;# 修改后
+- &amp;lt;div class=&quot;aplayer no-destroy&quot; data-id=&quot;5183531430&quot; data-server=&quot;netease&quot; data-type=&quot;playlist&quot; data-fixed=&quot;true&quot; data-mini=&quot;true&quot; data-listFolded=&quot;false&quot; data-order=&quot;random&quot; data-preload=&quot;none&quot; data-autoplay=&quot;false&quot; data-meting_api=&quot;https://meting.qjqq.cn/?server=:server&amp;amp;type=:type&amp;amp;id=:id&amp;amp;auth=:auth&amp;amp;r=:r&quot; muted&amp;gt;&amp;lt;/div&amp;gt;&lt;/p&gt;
+&lt;p&gt;根据上方的配置参数，这里添加了一个data-meting_api=”&lt;a href=&quot;https://meting.qjqq.cn/?server=:server&amp;amp;type=:type&amp;amp;id=:id&amp;amp;auth=:auth&amp;amp;r=:r&quot;&gt;https://meting.qjqq.cn/?server=:server&amp;amp;type=:type&amp;amp;id=:id&amp;amp;auth=:auth&amp;amp;r=:r&lt;/a&gt;“ 如果以后这个挂了也可以自建或者使用别人的api&lt;/p&gt;
+</content:encoded></item></channel></rss>
